@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import com.camilly.forense.api.model.enums.StatusEvidencia;
+
 @Data
 @Entity
 @Table(name = "evidencia")
@@ -31,7 +33,8 @@ public class Evidencia {
     @Column(name = "data_upload")
     private LocalDateTime dataUpload;
 
-    private String status = "APREENDIDA";
+    @Enumerated(EnumType.STRING)
+    private StatusEvidencia status = StatusEvidencia.APREENDIDA;
 
     @ManyToOne
     @JoinColumn(name = "custodiante_atual")

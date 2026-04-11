@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import com.camilly.forense.api.model.enums.AcaoCustodia;
+
 @Data
 @Entity
 @Table(name = "historico_custodia")
@@ -27,8 +29,9 @@ public class HistoricoCustodia {
     @Column(name = "data_hora")
     private LocalDateTime dataHora;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String acao;
+    private AcaoCustodia acao;
 
     @Column(columnDefinition = "TEXT")
     private String justificativa;

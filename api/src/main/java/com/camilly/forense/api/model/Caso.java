@@ -5,6 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.model.enums.StatusCaso;
+
 @Data
 @Entity
 @Table(name = "caso")
@@ -22,7 +24,8 @@ public class Caso {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
-    private String status = "ABERTO";
+    @Enumerated(EnumType.STRING)
+    private StatusCaso status = StatusCaso.ABERTO;
 
     @Column(name = "data_abertura")
     private LocalDateTime dataAbertura;

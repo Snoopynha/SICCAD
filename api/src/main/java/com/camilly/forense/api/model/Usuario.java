@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
+import com.camilly.forense.api.model.enums.TipoUsuario;
+
 @Data
 @Entity
 @Table(name = "usuario")
@@ -24,8 +26,9 @@ public class Usuario {
     @Column(name = "senha_hash", nullable = false)
     private String senhaHash;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "tipo_global")
-    private String tipoGlobal = "PADRAO";
+    private TipoUsuario tipoGlobal = TipoUsuario.PADRAO;
 
     @OneToMany(mappedBy = "usuario")
     private List<UsuarioCaso> casos;

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+import com.camilly.forense.api.model.enums.PapelCaso;
+
 @Data
 @Entity
 @Table(name = "usuarios_do_caso")
@@ -21,8 +23,9 @@ public class UsuarioCaso {
     @JoinColumn(name = "id_caso")
     private Caso caso;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "papel_no_caso", nullable = false)
-    private String papelNoCaso;
+    private PapelCaso papelNoCaso;
 
     @Column(name = "data_atribuicao")
     private LocalDateTime dataAtribuicao;
