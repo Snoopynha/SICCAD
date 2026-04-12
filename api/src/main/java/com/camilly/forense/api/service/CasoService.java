@@ -34,9 +34,35 @@ public class CasoService {
     }
 
     public Caso atualizarStatus(Long id, StatusCaso novoStatus) {
-        Caso casoExistente = buscarPorId(id);
-        casoExistente.setStatus(novoStatus);
+        Caso caso = buscarPorId(id);
+        
+        validarTransicao(caso.getStatus(), novoStatus);
+        caso.setStatus(novoStatus);
 
-        return casoRepository.save(casoExistente);
+        return casoRepository.save(caso);
+    }
+
+    public Caso iniciarPericia(Long id) {
+        return atualizarStatus(id, StatusCaso.EM_PERICIA);
+    }
+
+    public Caso concluirCaso(Long id) {
+        return atualizarStatus(id, StatusCaso.CONCLUIDO);
+    }
+
+    public Caso arquivarCaso(Long id) {
+        return atualizarStatus(id, StatusCaso.ARQUIVADO);
+    }
+
+    // Métodos auxiliares
+    private void validarTransicao(StatusCaso atual, StatusCaso novo) {
+        // ABERTO → EM_PERICIA
+        if (atual == StatusCaso.ABERTO && novo == StatusCaso.EM_PERICIA) return;
+        // EM_PERICIA → CONCLUIDO
+        if (atual == StatusCaso.EM_PERICIA && novo == StatusCaso.CONCLUIDO) return;
+        // CONCLUIDO → ARQUIVADO
+        if (atual == StatusCaso.CONCLUIDO && novo == StatusCaso.ARQUIVADO) return;
+        // Se não for nenhuma das válidas → erro
+        throw new RuntimeException("Transição inválida de " + atual + " para " + novo);
     }
 }
