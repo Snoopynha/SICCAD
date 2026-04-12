@@ -9,5 +9,6 @@ import com.camilly.forense.api.model.UsuarioCasoId;
 
 public interface UsuarioCasoRepository extends JpaRepository<UsuarioCaso, UsuarioCasoId> {
     Optional<UsuarioCaso> findByUsuarioIdAndCasoId(Long idUsuario, Long idCaso);
-    List<UsuarioCaso> findByCasoId(Long idCaso);
+    List<UsuarioCaso> findByCasoIdAndAtivoTrue(Long idCaso);
+    List<UsuarioCaso> findByUsuarioIdAndAtivoTrue(Long idUsuario);
 }

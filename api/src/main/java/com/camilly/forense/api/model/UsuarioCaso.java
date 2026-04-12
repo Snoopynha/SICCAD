@@ -29,4 +29,7 @@ public class UsuarioCaso {
 
     @Column(name = "data_atribuicao")
     private LocalDateTime dataAtribuicao;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
 }

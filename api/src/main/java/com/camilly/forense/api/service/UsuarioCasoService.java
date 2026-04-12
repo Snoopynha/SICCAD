@@ -40,11 +40,23 @@ public class UsuarioCasoService {
         return usuarioCasoRepository.save(vinculo);
     }
 
+    @Transactional
+    public void desvincularUsuario(Long idUsuario, Long idCaso) {
+        UsuarioCaso vinculo = usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).orElseThrow(() -> new RuntimeException("Vínculo não encontrado."));
+        vinculo.setAtivo(false);
+
+        usuarioCasoRepository.save(vinculo);
+    }
+
     public boolean temPermissao(Long idUsuario, Long idCaso) {
         return usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).isPresent();
     }
 
     public List<UsuarioCaso> listarEnvolvidosNoCaso(Long idCaso) {
-        return usuarioCasoRepository.findByCasoId(idCaso);
+        return usuarioCasoRepository.findByCasoIdAndAtivoTrue(idCaso);
+    }
+
+    public List<UsuarioCaso> listarCasosDoUsuario(Long idUsuario) {
+        return usuarioCasoRepository.findByUsuarioIdAndAtivoTrue(idUsuario);
     }
 }
