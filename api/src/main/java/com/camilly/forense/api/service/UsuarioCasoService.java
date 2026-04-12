@@ -14,12 +14,12 @@ import com.camilly.forense.api.repository.UsuarioCasoRepository;
 @RequiredArgsConstructor
 public class UsuarioCasoService {
     private final UsuarioCasoRepository usuarioCasoRepository;
-    private final UsuarioService usuarioSevice;
+    private final UsuarioService usuarioService;
     private final CasoService casoService;
 
     @Transactional
     public UsuarioCaso vincularUsuarioAoCaso(Long idUsuario, Long idCaso, PapelCaso papel) {
-        Usuario usuario = usuarioSevice.buscarPorId(idUsuario);
+        Usuario usuario = usuarioService.buscarPorId(idUsuario);
         Caso caso = casoService.buscarPorId(idCaso);
 
         if (usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).isPresent()) {
