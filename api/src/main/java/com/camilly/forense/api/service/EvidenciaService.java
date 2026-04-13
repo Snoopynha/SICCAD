@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.model.*;
 import com.camilly.forense.api.model.enums.StatusEvidencia;
 import com.camilly.forense.api.repository.EvidenciaRepository;
@@ -95,7 +96,7 @@ public class EvidenciaService {
         if (recurso.exists() && recurso.isReadable()) {
             return recurso;
         } else {
-            throw new RuntimeException("Arquivo não encontrado ou corrompido no servidor.");
+            throw new RecursoNaoEncontradoException("Arquivo não encontrado ou corrompido no servidor.");
         }
     }
 
@@ -104,12 +105,12 @@ public class EvidenciaService {
         Path caminhoArquivo = Paths.get(evidencia.getCaminhoArquivo());
 
         if (!Files.exists(caminhoArquivo)) {
-            throw new RuntimeException("Arquivo físico não encontrado para validação.");
+            throw new RecursoNaoEncontradoException("Arquivo físico não encontrado para validação.");
         }
 
         byte[] bytesArquivo = Files.readAllBytes(caminhoArquivo);
         String hashAtual = calcularHashSha256(bytesArquivo);
-        
+
         return hashAtual.equals(evidencia.getHashSha256());
     }
 

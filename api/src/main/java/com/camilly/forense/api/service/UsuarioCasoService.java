@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.*;
 import com.camilly.forense.api.model.enums.PapelCaso;
 import com.camilly.forense.api.repository.UsuarioCasoRepository;
@@ -23,7 +24,7 @@ public class UsuarioCasoService {
         Caso caso = casoService.buscarPorId(idCaso);
 
         if (usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).isPresent()) {
-            throw new RuntimeException("Este usuario já está vinculado ao caso");
+            throw new RegraDeNegocioException("Este usuario já está vinculado ao caso");
         }
 
         UsuarioCasoId chaveComposta = new UsuarioCasoId();

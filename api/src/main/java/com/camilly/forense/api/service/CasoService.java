@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.Caso;
 import com.camilly.forense.api.model.enums.StatusCaso;
 import com.camilly.forense.api.repository.CasoRepository;   
@@ -63,6 +64,6 @@ public class CasoService {
         // CONCLUIDO → ARQUIVADO
         if (atual == StatusCaso.CONCLUIDO && novo == StatusCaso.ARQUIVADO) return;
         // Se não for nenhuma das válidas → erro
-        throw new RuntimeException("Transição inválida de " + atual + " para " + novo);
+        throw new RegraDeNegocioException("Transição inválida de " + atual + " para " + novo);
     }
 }

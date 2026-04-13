@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
+import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.Usuario;
 import com.camilly.forense.api.model.enums.TipoUsuario;
 import com.camilly.forense.api.repository.UsuarioRepository;
@@ -17,11 +18,11 @@ public class UsuarioService {
 
     public Usuario criarUsuario(Usuario usuario) {
         if (usuarioRepository.findByCpf(usuario.getCpf()).isPresent()) {
-            throw new RuntimeException("Já existe um usuário com esse CPF");
+            throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
         }
 
         if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
-            throw new RuntimeException("Já existe um usuário com esse email");
+            throw new RegraDeNegocioException("Já existe um usuário com esse email");
         }
 
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenhaHash());

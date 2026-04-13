@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 
+import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.*;
 import com.camilly.forense.api.model.enums.AcaoCustodia;
 import com.camilly.forense.api.model.enums.StatusEvidencia;
@@ -37,11 +38,11 @@ public class HistoricoCustodiaService {
         Evidencia evidencia = evidenciaRepository.findById(idEvidencia).orElseThrow(() -> new RuntimeException("Evidência não encontrada"));
 
         if (!evidencia.getCustodianteAtual().getId().equals(idUsuarioOrigem)) {
-            throw new RuntimeException("Você não é o custodiante atual dessa evidência. Transferência bloqueada");
+            throw new RegraDeNegocioException("Você não é o custodiante atual dessa evidência. Transferência bloqueada");
         }
 
         if (evidencia.getCustodianteAtual() == null) {
-            throw new RuntimeException("Essa evidência não possui um custodiante ativo");
+            throw new RegraDeNegocioException("Essa evidência não possui um custodiante ativo");
         }
 
         Usuario usuarioOrigem = usuarioService.buscarPorId(idUsuarioOrigem);
@@ -71,7 +72,7 @@ public class HistoricoCustodiaService {
         Evidencia evidencia = evidenciaRepository.findById(idEvidencia).orElseThrow(() -> new RuntimeException("Evidência não encontrada"));
 
         if (!evidencia.getCustodianteAtual().getId().equals(idUsuarioLogado)) {
-            throw new RuntimeException("Apenas o custodiante atual pode iniciar a análise dessa evidência");
+            throw new RegraDeNegocioException("Apenas o custodiante atual pode iniciar a análise dessa evidência");
         }
 
         HistoricoCustodia log = new HistoricoCustodia();
@@ -97,7 +98,7 @@ public class HistoricoCustodiaService {
         Evidencia evidencia = evidenciaRepository.findById(idEvidencia).orElseThrow(() -> new RuntimeException("Evidência não encontrada"));
 
         if (!evidencia.getCustodianteAtual().getId().equals(idUsuarioLogado)) {
-            throw new RuntimeException("Apenas o custodiante atual pode devolver essa evidência");
+            throw new RegraDeNegocioException("Apenas o custodiante atual pode devolver essa evidência");
         }
 
         HistoricoCustodia log = new HistoricoCustodia();
@@ -123,7 +124,7 @@ public class HistoricoCustodiaService {
         Evidencia evidencia = evidenciaRepository.findById(idEvidencia).orElseThrow(() -> new RuntimeException("Evidência não encontrada"));
 
         if (!evidencia.getCustodianteAtual().getId().equals(idUsuarioLogado)) {
-            throw new RuntimeException("Apenas o custodiante atual pode descartar essa evidência");
+            throw new RegraDeNegocioException("Apenas o custodiante atual pode descartar essa evidência");
         }
 
         HistoricoCustodia log = new HistoricoCustodia();
