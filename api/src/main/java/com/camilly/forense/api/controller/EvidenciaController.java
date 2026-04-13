@@ -2,16 +2,16 @@ package com.camilly.forense.api.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 import lombok.RequiredArgsConstructor;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.camilly.forense.api.model.Evidencia;
 import com.camilly.forense.api.service.EvidenciaService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 @RestController
 @RequestMapping("/api/casos/{idCaso}/evidencias")
@@ -33,4 +33,25 @@ public class EvidenciaController {
         return ResponseEntity.ok(evidenciaService.buscarPorId(id));
     }
     
+    // GET - /api/casos/{idCaso}/evidencias/{idEvidencia}/download
+    @GetMapping("/{idEvidencia}/download")
+    public ResponseEntity<Resource> baixarEvidencia(@PathVariable Long idEvidencia) throws Exception {
+        Resource arquivo = evidenciaService.carregarArquivoComoRecurso(idEvidencia);
+
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + arquivo.getFilename() + "\"").body(arquivo);
+    }
+
+    // GET - /api/casos/{idCaso}/evidencias/{idEvidencia}/verificar-integridade
+    @GetMapping("/{idEvidencia}/verificar-integridade")
+    public ResponseEntity<Map<String, Object>> verificarIntegridade(@PathVariable Long idEvidencia) throws Exception {
+        boolean integro = evidenciaService.verificarIntegridade(idEvidencia);
+
+        Map<String, Object> resposta = new HashMap<>();
+        resposta.put("idEvidencia", idEvidencia);
+        resposta.put("integro", integro);
+        resposta.put("mensagem", integro ? "Sucesso: O arquivo está íntegro, não foi modificado" : "Crítico: O arquivo foi alterado");
+        
+        return ResponseEntity.ok(resposta);
+    }
+
 }

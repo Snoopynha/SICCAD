@@ -3,6 +3,8 @@ package com.camilly.forense.api.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import lombok.RequiredArgsConstructor;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -84,4 +86,31 @@ public class EvidenciaService {
 
         return caminhoDestino.toString();
     }
+
+    public Resource carregarArquivoComoRecurso(Long idEvidencia) throws Exception {
+        Evidencia evidencia = buscarPorId(idEvidencia);
+        Path caminhoArquivo = Paths.get(evidencia.getCaminhoArquivo()); 
+        Resource recurso = new UrlResource(caminhoArquivo.toUri());
+
+        if (recurso.exists() && recurso.isReadable()) {
+            return recurso;
+        } else {
+            throw new RuntimeException("Arquivo não encontrado ou corrompido no servidor.");
+        }
+    }
+
+    public boolean verificarIntegridade(Long idEvidencia) throws Exception {
+        Evidencia evidencia = buscarPorId(idEvidencia);
+        Path caminhoArquivo = Paths.get(evidencia.getCaminhoArquivo());
+
+        if (!Files.exists(caminhoArquivo)) {
+            throw new RuntimeException("Arquivo físico não encontrado para validação.");
+        }
+
+        byte[] bytesArquivo = Files.readAllBytes(caminhoArquivo);
+        String hashAtual = calcularHashSha256(bytesArquivo);
+        
+        return hashAtual.equals(evidencia.getHashSha256());
+    }
+
 }
