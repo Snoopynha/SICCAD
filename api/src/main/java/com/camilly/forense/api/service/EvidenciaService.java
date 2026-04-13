@@ -54,7 +54,7 @@ public class EvidenciaService {
     }
 
     public Evidencia buscarPorId(Long id) {
-        return evidenciaRepository.findById(id).orElseThrow(() -> new RuntimeException("Evidência não encontrada"));
+        return evidenciaRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Evidência não encontrada"));
     }
 
     // Métodos auxiliares

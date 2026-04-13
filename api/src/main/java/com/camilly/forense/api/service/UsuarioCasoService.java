@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.*;
 import com.camilly.forense.api.model.enums.PapelCaso;
@@ -43,7 +44,7 @@ public class UsuarioCasoService {
 
     @Transactional
     public void desvincularUsuario(Long idUsuario, Long idCaso) {
-        UsuarioCaso vinculo = usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).orElseThrow(() -> new RuntimeException("Vínculo não encontrado."));
+        UsuarioCaso vinculo = usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
         vinculo.setAtivo(false);
 
         usuarioCasoRepository.save(vinculo);

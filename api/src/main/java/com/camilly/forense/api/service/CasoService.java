@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.Caso;
 import com.camilly.forense.api.model.enums.StatusCaso;
@@ -23,7 +24,7 @@ public class CasoService {
     }
 
     public Caso buscarPorId(Long id) {
-        return casoRepository.findById(id).orElseThrow(() -> new RuntimeException("Não há caso com o ID: " + id));
+        return casoRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Não há caso com o ID: " + id));
     }
 
     public List<Caso> listarTodos() {
