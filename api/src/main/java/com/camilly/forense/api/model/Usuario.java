@@ -1,6 +1,9 @@
 package com.camilly.forense.api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.br.CPF;
 import lombok.Data;
 import java.util.List;
 
@@ -14,15 +17,21 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotBlank(message = "O nome é obrigatório")
     @Column(nullable = false, length = 150)
     private String nome;
 
+    @NotBlank(message = "O CPF é obrigatório")
+    @CPF(message = "CPF inválido")
     @Column(nullable = false, unique = true, length = 14)
     private String cpf;
 
+    @NotBlank(message = "O email é obrigatório")
+    @Email(message = "Formato de email inválido")
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @NotBlank(message = "Insira sua senha")
     @Column(name = "senha_hash", nullable = false)
     private String senhaHash;
 

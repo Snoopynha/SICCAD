@@ -12,6 +12,8 @@ import com.camilly.forense.api.model.enums.StatusCaso;
 import com.camilly.forense.api.service.CasoService;
 import com.camilly.forense.api.service.UsuarioCasoService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/casos")
 @RequiredArgsConstructor
@@ -21,7 +23,7 @@ public class CasoController {
 
     // POST - /api/casos?idUsuarioLogado={id}
     @PostMapping("")
-    public ResponseEntity<Caso> criarCaso(@RequestBody Caso caso, @RequestParam Long idUsuarioLogado) {
+    public ResponseEntity<Caso> criarCaso(@Valid @RequestBody Caso caso, @RequestParam Long idUsuarioLogado) {
         Caso casoCriado = casoService.criarCaso(caso);
         usuarioCasoService.vincularUsuarioAoCaso(idUsuarioLogado, casoCriado.getId(), PapelCaso.DELEGADO);
 

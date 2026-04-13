@@ -1,6 +1,7 @@
 package com.camilly.forense.api.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,9 +16,11 @@ public class Caso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "O número do processo é obrigatório")
     @Column(name = "numero_processo", nullable = false, unique = true, length = 50)
     private String numeroProcesso;
 
+    @NotBlank(message = "O titulo do processo é obrigatório")
     @Column(nullable = false, length = 200)
     private String titulo;
 

@@ -11,6 +11,7 @@ import com.camilly.forense.api.model.UsuarioCaso;
 import com.camilly.forense.api.service.UsuarioCasoService;
 import com.camilly.forense.api.service.UsuarioService;
 
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -21,7 +22,7 @@ public class UsuarioController {
 
     // POST - /api/usuarios
     @PostMapping("")
-    public ResponseEntity<Usuario> criarUsuario(@RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> criarUsuario(@Valid @RequestBody Usuario usuario) {
         Usuario usuarioCriado = usuarioService.criarUsuario(usuario);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
