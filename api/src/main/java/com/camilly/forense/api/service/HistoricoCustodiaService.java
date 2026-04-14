@@ -132,7 +132,7 @@ public class HistoricoCustodiaService {
         log.setEvidencia(evidencia);
         log.setCustodianteAnterior(evidencia.getCustodianteAtual());
         log.setCustodiantePosterior(null);
-        log.setAcao(AcaoCustodia.DEVOLUCAO);
+        log.setAcao(AcaoCustodia.DESCARTE);
         log.setJustificativa(justificativa);
         log.setDataHora(LocalDateTime.now());
         log.setValidacaoHash(evidencia.getHashSha256());
