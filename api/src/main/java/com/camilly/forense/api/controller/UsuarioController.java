@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
+import com.camilly.forense.api.dto.LoginDTO;
 import com.camilly.forense.api.model.Usuario;
 import com.camilly.forense.api.model.UsuarioCaso;
 import com.camilly.forense.api.service.UsuarioCasoService;
@@ -26,6 +27,12 @@ public class UsuarioController {
         Usuario usuarioCriado = usuarioService.criarUsuario(usuario);
         
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
+    }
+
+    // POST - /api/usuarios/login
+    @PostMapping("/login")
+    public ResponseEntity<Usuario> login(@Valid @RequestBody LoginDTO login) {
+        return ResponseEntity.ok(usuarioService.autenticar(login.email(), login.senha()));
     }
     
     // GET - /api/usuarios/{id}

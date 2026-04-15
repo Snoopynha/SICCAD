@@ -36,6 +36,16 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
+    public Usuario autenticar(String email, String senha) {
+        Usuario usuario = usuarioRepository.findByEmail(email).orElseThrow(() -> new RegraDeNegocioException("E-mail ou senha inválidos"));
+        
+        if (!passwordEncoder.matches(senha, usuario.getSenhaHash())) {
+            throw new RegraDeNegocioException("E-mail ou senha inválidos");
+        }
+        
+        return usuario;
+    }
+
     public Usuario buscarPorId(Long id) {
         return usuarioRepository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
     }
