@@ -8,6 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 import com.camilly.forense.api.model.enums.TipoUsuario;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -21,6 +22,7 @@ public class Usuario {
     @Column(nullable = false, length = 150)
     private String nome;
 
+    @JsonIgnore
     @NotBlank(message = "O CPF é obrigatório")
     @CPF(message = "CPF inválido")
     @Column(nullable = false, unique = true, length = 14)
@@ -31,14 +33,17 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
+    @JsonIgnore
     @NotBlank(message = "Insira sua senha")
     @Column(name = "senha_hash", nullable = false)
     private String senhaHash;
 
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_global")
     private TipoUsuario tipoGlobal = TipoUsuario.PADRAO;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "usuario")
     private List<UsuarioCaso> casos;
 }
