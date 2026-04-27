@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.camilly.forense.api.model.enums.StatusCaso;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Entity
@@ -14,6 +16,7 @@ import com.camilly.forense.api.model.enums.StatusCaso;
 public class Caso {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @NotBlank(message = "O número do processo é obrigatório")
@@ -28,11 +31,15 @@ public class Caso {
     private String descricao;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private StatusCaso status = StatusCaso.ABERTO;
 
     @Column(name = "data_abertura")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime dataAbertura;
 
     @OneToMany(mappedBy = "caso")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnoreProperties("caso")
     private List<UsuarioCaso> usuarios;
 }

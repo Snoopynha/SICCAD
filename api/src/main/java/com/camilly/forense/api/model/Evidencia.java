@@ -5,6 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 import com.camilly.forense.api.model.enums.StatusEvidencia;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @Entity
@@ -12,6 +14,7 @@ import com.camilly.forense.api.model.enums.StatusEvidencia;
 public class Evidencia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @ManyToOne
@@ -25,14 +28,18 @@ public class Evidencia {
     private Long tamanhoBytes;
 
     @Column(name = "hash_sha256", nullable = false, length = 64)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String hashSha256;
 
+    @JsonIgnore
     @Column(name = "caminho_arquivo", nullable = false, length = 500)
     private String caminhoArquivo;
 
     @Column(name = "data_upload")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime dataUpload;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Enumerated(EnumType.STRING)
     private StatusEvidencia status = StatusEvidencia.APREENDIDA;
 
