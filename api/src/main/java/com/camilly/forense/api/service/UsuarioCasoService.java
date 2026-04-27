@@ -8,8 +8,10 @@ import java.util.List;
 
 import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
+import com.camilly.forense.api.dto.UsuarioCasoResponse;
 import com.camilly.forense.api.model.*;
 import com.camilly.forense.api.model.enums.PapelCaso;
+import com.camilly.forense.api.repository.CasoRepository;
 import com.camilly.forense.api.repository.UsuarioCasoRepository;
 
 @Service
@@ -17,16 +19,23 @@ import com.camilly.forense.api.repository.UsuarioCasoRepository;
 public class UsuarioCasoService {
     private final UsuarioCasoRepository usuarioCasoRepository;
     private final UsuarioService usuarioService;
-    private final CasoService casoService;
+    private final CasoRepository casoRepository;
+    private final AutorizacaoService autorizacaoService;
 
     @Transactional
-    public UsuarioCaso vincularUsuarioAoCaso(Long idUsuario, Long idCaso, PapelCaso papel) {
-        Usuario usuario = usuarioService.buscarPorId(idUsuario);
-        Caso caso = casoService.buscarPorId(idCaso);
+    public UsuarioCasoResponse vincularUsuarioAoCaso(Long idUsuario, Long idCaso, PapelCaso papel, Long idUsuarioLogado) {
+        Caso caso = casoRepository.findById(idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Caso não encontrado"));
+        autorizacaoService.validarPapelNoCaso(caso, idUsuarioLogado, PapelCaso.DELEGADO);
+        
+        if (!idUsuario.equals(idUsuarioLogado)) {
+            autorizacaoService.validarAcessoAoCaso(caso, idUsuarioLogado);
+        }
 
         if (usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).isPresent()) {
             throw new RegraDeNegocioException("Este usuario já está vinculado ao caso");
         }
+
+        Usuario usuario = usuarioService.buscarUsuarioCompletoPorId(idUsuario);
 
         UsuarioCasoId chaveComposta = new UsuarioCasoId();
         chaveComposta.setIdUsuario(idUsuario);
@@ -38,27 +47,38 @@ public class UsuarioCasoService {
         vinculo.setCaso(caso);
         vinculo.setPapelNoCaso(papel);
         vinculo.setDataAtribuicao(LocalDateTime.now());
+        vinculo.setAtivo(true);
 
-        return usuarioCasoRepository.save(vinculo);
+        return toResponse(usuarioCasoRepository.save(vinculo));
     }
 
     @Transactional
-    public void desvincularUsuario(Long idUsuario, Long idCaso) {
-        UsuarioCaso vinculo = usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Vínculo não encontrado"));
+    public void desvincularUsuario(Long idUsuario, Long idCaso, Long idUsuarioLogado) {
+        Caso caso = casoRepository.findById(idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Caso não encontrado"));
+        autorizacaoService.validarPapelNoCaso(caso, idUsuarioLogado, PapelCaso.DELEGADO);
+
+        UsuarioCaso vinculo = usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Não foi encontrado vínculo deste usuário com o caso"));
         vinculo.setAtivo(false);
 
         usuarioCasoRepository.save(vinculo);
     }
 
-    public boolean temPermissao(Long idUsuario, Long idCaso) {
-        return usuarioCasoRepository.findByUsuarioIdAndCasoId(idUsuario, idCaso).isPresent();
+    public List<UsuarioCasoResponse> listarEnvolvidosNoCaso(Long idCaso, Long idUsuarioLogado) {
+        Caso caso = casoRepository.findById(idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Caso não encontrado"));
+        
+        autorizacaoService.validarAcessoAoCaso(caso, idUsuarioLogado);
+        return usuarioCasoRepository.findByCasoIdAndAtivoTrue(idCaso).stream().map(this::toResponse).toList();
     }
 
-    public List<UsuarioCaso> listarEnvolvidosNoCaso(Long idCaso) {
-        return usuarioCasoRepository.findByCasoIdAndAtivoTrue(idCaso);
+    private UsuarioCasoResponse toResponse(UsuarioCaso usuario) {
+        return new UsuarioCasoResponse(
+            usuario.getUsuario().getId(),
+            usuario.getUsuario().getNome(),
+            usuario.getUsuario().getEmail(),
+            usuario.getPapelNoCaso(),
+            usuario.getDataAtribuicao(),
+            usuario.getAtivo()
+        );
     }
 
-    public List<UsuarioCaso> listarCasosDoUsuario(Long idUsuario) {
-        return usuarioCasoRepository.findByUsuarioIdAndAtivoTrue(idUsuario);
-    }
 }
