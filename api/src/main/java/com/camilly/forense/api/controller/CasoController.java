@@ -21,45 +21,51 @@ public class CasoController {
     private final CasoService casoService;
     private final UsuarioCasoService usuarioCasoService;
 
-    // POST - /api/casos?idUsuarioLogado={id}
+    // POST - /api/casos
     @PostMapping("")
-    public ResponseEntity<Caso> criarCaso(@Valid @RequestBody Caso caso, @RequestParam Long idUsuarioLogado) {
-        Caso casoCriado = casoService.criarCaso(caso);
-        usuarioCasoService.vincularUsuarioAoCaso(idUsuarioLogado, casoCriado.getId(), PapelCaso.DELEGADO);
+    public ResponseEntity<Caso> criar(@Valid @RequestBody Caso caso, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        Caso casoCriado = casoService.criar(caso);
+        usuarioCasoService.vincularUsuarioAoCaso(idUsuarioLogado, casoCriado.getId(), PapelCaso.DELEGADO, idUsuarioLogado);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(casoCriado);
     }
 
     // GET - /api/casos/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Caso> buscarPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(casoService.buscarPorId(id));
+    public ResponseEntity<Caso> buscarPorId(@PathVariable Long id, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        return ResponseEntity.ok(casoService.buscarPorId(id, idUsuarioLogado));
     }
     
     // GET - /api/casos
     @GetMapping("")
-    public ResponseEntity<List<Caso>> listarCasos(@RequestParam(required = false) StatusCaso status) {
-        if (status != null) return ResponseEntity.ok(casoService.listarPorStatus(status));
+    public ResponseEntity<List<Caso>> listarMeusCasos(@RequestHeader("X-User-Id") Long idUsuarioLogado, @RequestParam(required = false) StatusCaso status) {
+        if (status != null) return ResponseEntity.ok(casoService.listarMeusCasosPorStatus(idUsuarioLogado, status));
         
-        return ResponseEntity.ok(casoService.listarTodos());
+        return ResponseEntity.ok(casoService.listarMeusCasos(idUsuarioLogado));
     }
 
     // PATCH - /api/casos/{id}/iniciar-pericia
     @PatchMapping("/{id}/iniciar-pericia")
-    public ResponseEntity<Caso> iniciarPericia(@PathVariable Long id) {
-        return ResponseEntity.ok(casoService.iniciarPericia(id));
+    public ResponseEntity<Caso> iniciarPericia(@PathVariable Long id, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        return ResponseEntity.ok(casoService.iniciarPericia(id, idUsuarioLogado));
     }
     
     // PATCH - /api/casos/{id}/concluir
     @PatchMapping("/{id}/concluir")
-    public ResponseEntity<Caso> concluirCaso(@PathVariable Long id) {
-        return ResponseEntity.ok(casoService.concluirCaso(id));
+    public ResponseEntity<Caso> concluirCaso(@PathVariable Long id, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        return ResponseEntity.ok(casoService.concluirCaso(id, idUsuarioLogado));
     }
 
     // PATCH - /api/casos/{id}/arquivar
     @PatchMapping("/{id}/arquivar")
-    public ResponseEntity<Caso> arquivarCaso(@PathVariable Long id) {
-        return ResponseEntity.ok(casoService.arquivarCaso(id));
+    public ResponseEntity<Caso> arquivarCaso(@PathVariable Long id, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        return ResponseEntity.ok(casoService.arquivarCaso(id, idUsuarioLogado));
+    }
+
+    // PATCH - /api/casos/{id}/reabrir
+    @PatchMapping("/{id}/reabrir")
+    public ResponseEntity<Caso> reabrirCaso(@PathVariable Long id, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
+        return ResponseEntity.ok(casoService.reabrirCaso(id, idUsuarioLogado));
     }
 
 }

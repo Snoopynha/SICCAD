@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
-import com.camilly.forense.api.dto.LoginDTO;
-import com.camilly.forense.api.model.Usuario;
-import com.camilly.forense.api.model.UsuarioCaso;
-import com.camilly.forense.api.service.UsuarioCasoService;
+import com.camilly.forense.api.dto.LoginRequest;
+import com.camilly.forense.api.dto.LoginResponse;
+import com.camilly.forense.api.dto.UsuarioRequest;
+import com.camilly.forense.api.dto.UsuarioResponse;
 import com.camilly.forense.api.service.UsuarioService;
 
 import jakarta.validation.Valid;
@@ -19,38 +19,29 @@ import jakarta.validation.Valid;
 @RequiredArgsConstructor
 public class UsuarioController {
     private final UsuarioService usuarioService;
-    private final UsuarioCasoService usuarioCasoService;
 
     // POST - /api/usuarios
     @PostMapping("")
-    public ResponseEntity<Usuario> criarUsuario(@Valid @RequestBody Usuario usuario) {
-        Usuario usuarioCriado = usuarioService.criarUsuario(usuario);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioCriado);
+    public ResponseEntity<UsuarioResponse> criar(@Valid @RequestBody UsuarioRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioService.criar(request));
     }
 
-    // POST - /api/usuarios/login
-    @PostMapping("/login")
-    public ResponseEntity<Usuario> login(@Valid @RequestBody LoginDTO login) {
-        return ResponseEntity.ok(usuarioService.autenticar(login.email(), login.senha()));
+    // POST - /api/usuarios/autenticar
+    @PostMapping("/autenticar")
+    public ResponseEntity<LoginResponse> autenticar(@Valid @RequestBody LoginRequest login) {
+        return ResponseEntity.ok(usuarioService.autenticar(login));
     }
     
     // GET - /api/usuarios/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponse> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
     
     // GET - /api/usuarios
     @GetMapping("")
-    public ResponseEntity<List<Usuario>> listarTodos() {
-        return ResponseEntity.ok(usuarioService.listarTodos());
-    }
-
-    // GET - /api/usuarios/{id}/casos
-    @GetMapping("/{id}/casos")
-    public ResponseEntity<List<UsuarioCaso>> listarMeusCasos(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioCasoService.listarCasosDoUsuario(id));
+    public ResponseEntity<List<UsuarioResponse>> listar() {
+        return ResponseEntity.ok(usuarioService.listar());
     }
 
 }
