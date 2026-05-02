@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.camilly.forense.api.blockchain.BlockchainSimuladaService;
+import com.camilly.forense.api.blockchain.Bloco;
 import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.dto.HistoricoCustodiaResponse;
@@ -23,6 +25,7 @@ public class HistoricoCustodiaService {
     private final UsuarioService usuarioService;
     private final EvidenciaRepository evidenciaRepository;
     private final AutorizacaoService autorizacaoService;
+    private final BlockchainSimuladaService blockchainService;
 
     @Transactional
     public void registrarAcaoInicial(Evidencia evidencia, Usuario perito, String justificativa) {
@@ -34,6 +37,15 @@ public class HistoricoCustodiaService {
         log.setJustificativa(justificativa);
         log.setDataHora(LocalDateTime.now());
         log.setValidacaoHash(evidencia.getHashSha256());
+
+        Bloco bloco = blockchainService.registrarAcao(
+            evidencia.getId(), 
+            evidencia.getHashSha256(), 
+            perito.getId(), 
+            1 // 1 = Coleta Inicial
+        );
+        
+        log.setAuditoriaCorrenteHash(bloco.getHashDoBloco());
 
         historicoCustodiaRepository.save(log);
     }
@@ -153,8 +165,17 @@ public class HistoricoCustodiaService {
         log.setJustificativa(justificativa);
         log.setDataHora(LocalDateTime.now());
         log.setValidacaoHash(evidencia.getHashSha256());
-        // MUDAR DEPOIS*** para se comunicar com o hash da Blockchain
-        log.setAuditoriaCorrenteHash(String.valueOf((evidencia.getHashSha256() + acao + LocalDateTime.now()).hashCode()));
+        
+        int idAcaoBlockchain = converterAcaoParaId(acao);
+
+        Bloco bloco = blockchainService.registrarAcao(
+            evidencia.getId(), 
+            evidencia.getHashSha256(), 
+            atual.getId(), 
+            idAcaoBlockchain
+        );
+
+        log.setAuditoriaCorrenteHash(bloco.getHashDoBloco());
 
         return log;
     }
@@ -183,6 +204,18 @@ public class HistoricoCustodiaService {
             case ANALISE -> "Análise da evidência";
             case DEVOLUCAO -> "Devolução da evidência";
             case DESCARTE -> "Descarte da evidência";
+        };
+    }
+
+    private int converterAcaoParaId(AcaoCustodia acao) {
+        return switch (acao) {
+            case COLETA -> 1;
+            case TRANSFERENCIA -> 2;
+            case RECEBIMENTO -> 3;
+            case ANALISE -> 4;
+            case DEVOLUCAO -> 5;
+            case DESCARTE -> 6;
+            default -> 99;
         };
     }
 
