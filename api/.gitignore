@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivos gerados pelo sistema
+blockchain_ledger.json
+uploads_evidencias/
