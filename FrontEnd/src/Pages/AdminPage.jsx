@@ -3,13 +3,12 @@ import { useState } from "react";
 import AdminHeader from "../components/Admin/AdminHeader";
 import FiltersBar from "../components/Admin/FiltersBar";
 import UsersList from "../components/Admin/UsersList";
-import CreateUserModal from "../components/Admin/CreateUserModal";
+import CreateUserModal from "../components/Admin/CreateUserModal"; 
 
 export default function AdminPage() {
-
+  
   const [temaClaro, setTemaClaro] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
-
   const usuarios = [
     { id: 1, nome: "Felipe Soares", cargo: "DELEGADO", email: "felipe@email.com" },
     { id: 2, nome: "Amanda Costa", cargo: "PERITO", email: "amanda@email.com" },
