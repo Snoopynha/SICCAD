@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import java.util.List;
 
 import com.camilly.forense.api.model.Caso;
-import com.camilly.forense.api.model.enums.PapelCaso;
 import com.camilly.forense.api.model.enums.StatusCaso;
 import com.camilly.forense.api.service.CasoService;
 import com.camilly.forense.api.service.UsuarioCasoService;
@@ -25,7 +24,7 @@ public class CasoController {
     @PostMapping("")
     public ResponseEntity<Caso> criar(@Valid @RequestBody Caso caso, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
         Caso casoCriado = casoService.criar(caso);
-        usuarioCasoService.vincularUsuarioAoCaso(idUsuarioLogado, casoCriado.getId(), PapelCaso.DELEGADO, idUsuarioLogado);
+        usuarioCasoService.vincularCriadorAoCaso(idUsuarioLogado, casoCriado.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(casoCriado);
     }
