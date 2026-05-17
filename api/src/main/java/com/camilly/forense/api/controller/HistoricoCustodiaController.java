@@ -49,7 +49,7 @@ public class HistoricoCustodiaController {
 
     // GET - /api/casos/{idCaso}/evidencias/{idEvidencia}/listarHistorico
     @GetMapping("/historico")
-    public ResponseEntity<List<HistoricoCustodiaResponse>> listarHistorico(@PathVariable Long idEvidencia, @RequestHeader("X-User_Id") Long idUsuarioLogado) {
+    public ResponseEntity<List<HistoricoCustodiaResponse>> listarHistorico(@PathVariable Long idEvidencia, @RequestHeader("X-User-Id") Long idUsuarioLogado) {
         return ResponseEntity.ok(historicoCustodiaService.listarHistorico(idEvidencia, idUsuarioLogado));
     }
 

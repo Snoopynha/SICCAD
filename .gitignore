@@ -21,6 +21,11 @@ hs_err_pid*
 target/
 build/
 
+# Python
+.venv/
+venv/
+__pycache__/
+
 # Common
 .DS_Store
 Thumbs.db
