@@ -53,6 +53,27 @@ public class UsuarioCasoService {
     }
 
     @Transactional
+    public void vincularCriadorAoCaso(Long idUsuario, Long idCaso) {
+        Caso caso = casoRepository.findById(idCaso)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Caso não encontrado"));
+        Usuario usuario = usuarioService.buscarUsuarioCompletoPorId(idUsuario);
+
+        UsuarioCasoId chaveComposta = new UsuarioCasoId();
+        chaveComposta.setIdUsuario(idUsuario);
+        chaveComposta.setIdCaso(idCaso);
+
+        UsuarioCaso vinculo = new UsuarioCaso();
+        vinculo.setId(chaveComposta);
+        vinculo.setUsuario(usuario);
+        vinculo.setCaso(caso);
+        vinculo.setPapelNoCaso(PapelCaso.DELEGADO); // Criador sempre entra como Delegado
+        vinculo.setDataAtribuicao(LocalDateTime.now());
+        vinculo.setAtivo(true);
+
+        usuarioCasoRepository.save(vinculo);
+    }
+
+    @Transactional
     public void desvincularUsuario(Long idUsuario, Long idCaso, Long idUsuarioLogado) {
         Caso caso = casoRepository.findById(idCaso).orElseThrow(() -> new RecursoNaoEncontradoException("Caso não encontrado"));
         autorizacaoService.validarPapelNoCaso(caso, idUsuarioLogado, PapelCaso.DELEGADO);

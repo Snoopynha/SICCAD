@@ -7,10 +7,12 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+@Service
 public class BlockchainSimuladaService {
     private final String ARQUIVO_LEDGER = "blockchain_ledger.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -42,7 +44,7 @@ public class BlockchainSimuladaService {
         genesis.setIdAcao(0);
         genesis.setHashAnterior("0");
         genesis.setHashDoBloco(calcularHash(genesis));
-        
+
         cadeia.add(genesis);
         salvarNoDisco();
     }
@@ -62,7 +64,7 @@ public class BlockchainSimuladaService {
 
         cadeia.add(novoBloco);
         salvarNoDisco();
-        
+
         return novoBloco;
     }
 
@@ -75,13 +77,13 @@ public class BlockchainSimuladaService {
     }
 
     private String calcularHash(Bloco bloco) {
-        String dadosParaHash = bloco.getIndex() + 
-                               bloco.getTimestamp().toString() + 
-                               bloco.getIdEvidencia() + 
-                               bloco.getHashEvidencia() + 
-                               bloco.getIdUsuarioCriptografado() + 
-                               bloco.getIdAcao() + 
-                               bloco.getHashAnterior();
+        String dadosParaHash = bloco.getIndex() +
+                bloco.getTimestamp().toString() +
+                bloco.getIdEvidencia() +
+                bloco.getHashEvidencia() +
+                bloco.getIdUsuarioCriptografado() +
+                bloco.getIdAcao() +
+                bloco.getHashAnterior();
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = digest.digest(dadosParaHash.getBytes(StandardCharsets.UTF_8));
@@ -97,7 +99,7 @@ public class BlockchainSimuladaService {
             throw new RuntimeException("Erro ao calcular hash", e);
         }
     }
-    
+
     // Método para auditoria
     public boolean verificarIntegridadeDaBlockchain() {
         for (int i = 1; i < cadeia.size(); i++) {
@@ -110,7 +112,7 @@ public class BlockchainSimuladaService {
             }
             // O hash anterior salvo no bloco atual aponta mesmo para o bloco anterior?
             if (!blocoAtual.getHashAnterior().equals(blocoAnterior.getHashDoBloco())) {
-                return false; 
+                return false;
             }
         }
         return true;
