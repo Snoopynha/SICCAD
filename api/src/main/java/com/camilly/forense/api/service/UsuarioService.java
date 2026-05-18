@@ -36,7 +36,7 @@ public class UsuarioService {
         usuario.setCpf(request.cpf());
         usuario.setEmail(request.email());
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
-        usuario.setTipoGlobal(TipoUsuario.PADRAO);
+        usuario.setTipoGlobal(TipoUsuario.valueOf(request.cargo().toUpperCase()));
 
         Usuario salvo = usuarioRepository.save(usuario);
         return new UsuarioResponse(salvo.getId(), salvo.getNome(), salvo.getEmail());

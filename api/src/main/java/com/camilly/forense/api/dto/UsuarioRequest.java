@@ -18,7 +18,10 @@ public record UsuarioRequest(
     String email,
 
     @NotBlank(message = "A senha é obrigatória")
-    String senha
+    String senha,
+
+    @NotBlank(message = "O cargo é obrigatório")
+    String cargo
 ) {
     
 }
