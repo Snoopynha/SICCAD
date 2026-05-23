@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import LoginIcon from "../components/Login/LoginIcon";
 import EmailStep from "../components/Login/EmailStep";
@@ -6,6 +7,8 @@ import PasswordStep from "../components/Login/PasswordStep";
 import FooterActions from "../components/Login/FooterActions";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -20,17 +23,17 @@ export default function Login() {
   const [temaClaro, setTemaClaro] = useState(false);
 
   function validarEmail(valor) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(valor);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
   }
 
   function avancar() {
-    if (validarEmail(email)) {
-      setErroEmail("");
-      setMostrarSenha(true);
-    } else {
+    if (!validarEmail(email)) {
       setErroEmail("Digite um e-mail válido.");
+      return;
     }
+
+    setErroEmail("");
+    setMostrarSenha(true);
   }
 
   function voltar() {
@@ -40,92 +43,64 @@ export default function Login() {
   }
 
   async function autenticar() {
-    setErroSenha("");
+  setErroSenha("");
 
-    if (!validarEmail(email)) {
-      setErroEmail("E-mail inválido.");
+  if (!validarEmail(email)) {
+    setErroEmail("E-mail inválido.");
+    return;
+  }
+
+  if (senha.trim() === "") {
+    setErroSenha("Digite sua senha.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const response = await fetch(
+      "http://localhost:8080/api/usuarios/autenticar",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, senha }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setErroSenha(data?.message || "Falha na autenticação.");
+      setLoading(false);
       return;
     }
 
-    if (senha.trim() === "") {
-      setErroSenha("Digite sua senha.");
-      return;
-    }
+    const usuario = data;
 
-    setLoading(true);
+    console.log("LOGIN OK:", usuario);
 
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/usuarios/autenticar",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            email,
-            senha
-          })
-        }
-      );
+    localStorage.setItem("usuario", JSON.stringify(usuario));
 
-      const data = await response.json();
+    setLoading(false);
 
-      if (!response.ok) {
-        setLoading(false);
-        setErroSenha(data?.message || "Falha na autenticação.");
-        return;
-      }
+    // 🔥 IMPORTANTE: deixa o Router decidir depois
+    window.location.href =
+      usuario?.tipo_global === "ADMIN"
+        ? "/admin"
+        : "/dashboard";
 
-      setLoading(false);
-
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      if (data?.usuario) {
-        localStorage.setItem("usuario", JSON.stringify(data.usuario));
-      }
-
-      console.log("Login OK:", data);
-
-      // opcional
-      // window.location.href = "/dashboard";
-
-    } catch (error) {
-      setLoading(false);
-      setErroSenha("Erro ao conectar com o servidor.");
-    }
+  } catch (error) {
+    setLoading(false);
+    setErroSenha("Erro ao conectar com o servidor.");
+    console.error(error);
   }
-
-  function trocarIdioma() {
-    setIdioma((prev) => (prev === "pt" ? "en" : "pt"));
-  }
-
-  function trocarTema() {
-    setTemaClaro((prev) => !prev);
-  }
-
+}
   return (
     <div
-      className={`
-        w-full
-        min-h-screen
-        flex
-        flex-col
-        items-center
-        justify-between
-        px-6
-        py-5
-        transition-all
-        duration-300
-
-        ${
-          temaClaro
-            ? "bg-[#f5f7fb] text-black"
-            : "bg-[#050505] text-white"
-        }
-      `}
+      className={`w-full min-h-screen flex flex-col items-center justify-between px-6 py-5
+      ${temaClaro ? "bg-[#f5f7fb] text-black" : "bg-[#050505] text-white"}`}
     >
       <div />
 
@@ -133,17 +108,11 @@ export default function Login() {
         <LoginIcon temaClaro={temaClaro} />
 
         <div className="text-center">
-          <h1 className="text-4xl font-semibold tracking-tight">
+          <h1 className="text-4xl font-semibold">
             {idioma === "pt" ? "Seja Bem-Vindo(a)!" : "Welcome"}
           </h1>
 
-          <p
-            className={`
-              mt-3
-              text-sm
-              ${temaClaro ? "text-zinc-500" : "text-zinc-400"}
-            `}
-          >
+          <p className="text-sm mt-3 text-zinc-400">
             {idioma === "pt"
               ? "Insira suas credenciais para acessar sua conta."
               : "Enter your credentials to access your account."}
@@ -173,30 +142,19 @@ export default function Login() {
           />
         )}
 
-        <a
-          href="#"
-          className="text-sky-400 text-sm font-bold hover:opacity-80 transition"
-        >
+        <a className="text-sky-400 text-sm font-bold">
           {idioma === "pt" ? "ESQUECI A SENHA" : "FORGOT PASSWORD"}
         </a>
       </div>
 
-      <div className="w-full flex flex-col items-center gap-5">
-        <div
-          className={`
-            w-[85%]
-            h-[1px]
-            ${temaClaro ? "bg-zinc-300" : "bg-zinc-800"}
-          `}
-        />
-
-        <FooterActions
-          idioma={idioma}
-          trocarIdioma={trocarIdioma}
-          trocarTema={trocarTema}
-          temaClaro={temaClaro}
-        />
-      </div>
+      <FooterActions
+        idioma={idioma}
+        trocarIdioma={() =>
+          setIdioma((prev) => (prev === "pt" ? "en" : "pt"))
+        }
+        trocarTema={() => setTemaClaro((prev) => !prev)}
+        temaClaro={temaClaro}
+      />
     </div>
   );
 }

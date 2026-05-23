@@ -1,16 +1,48 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./Pages/Login";
 import Admin from "./Pages/AdminPage";
+import Dashboard from "./Pages/Dashboard";
 
-export default function App(){
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-  return(
+function Rotas() {
+  const { usuario, loading } = useAuth();
 
-    <div className="w-full h-screen bg-zinc-950 flex items-center justify-center relative transition-all duration-300">
+  if (loading) return null;
 
-      <Admin/>
+  console.log("USUARIO COMPLETO:", usuario);
+  console.log("TIPO:", usuario?.tipo_global);
 
-    </div>
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
 
+      <Route
+        path="/dashboard"
+        element={
+          usuario ? <Dashboard /> : <Navigate to="/" replace />
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          usuario?.tipo_global === "ADMIN"
+            ? <Admin />
+            : <Navigate to="/" replace />
+        }
+      />
+    </Routes>
   );
+}
 
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Rotas />
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }

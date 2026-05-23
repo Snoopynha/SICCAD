@@ -5,7 +5,7 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
   const [cpf, setCpf] = useState("");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [cargo, setCargo] = useState("DELEGADO");
+  const [cargo, setCargo] = useState("");
 
   function validarSenha(valor) {
     if (!valor) {
@@ -52,7 +52,7 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
   const statusSenha = validarSenha(senha);
 
   async function criarUsuario() {
-    if (!nome || !email || !cpf || !senha) {
+    if (!nome || !email || !cpf || !senha || !cargo) {
       alert("Por favor, preencha todos os campos.");
       return;
     }
@@ -62,12 +62,11 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       email,
       cpf,
       senha,
-      cargo 
+      cargo
     };
 
     try {
-      // Rota relativa controlada pelo Proxy do Vite
-      const res = await fetch("/api/usuarios", {
+      const res = await fetch("http://localhost:8080/api/usuarios", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -82,14 +81,11 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
         return;
       }
 
-      const data = await res.json();
-      console.log("Usuário criado com sucesso:", data);
-
-      fecharModal(); 
-
+      await res.json();
+      fecharModal();
     } catch (err) {
       console.log("Erro de conexão:", err);
-      alert("Não foi possível conectar ao servidor backend.");
+      alert("Erro ao conectar no backend.");
     }
   }
 
@@ -101,55 +97,38 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       <div
         onClick={(e) => e.stopPropagation()}
         className={`
-          relative z-[1000]
-          w-full max-w-[520px]
-          rounded-[32px] border p-8 shadow-2xl
+          w-full max-w-[520px] rounded-[32px] border p-8 shadow-2xl
           transition-all duration-300
-          ${temaClaro ? "bg-white/95 border-zinc-200" : "bg-[#0b0b0b]/95 border-zinc-800"}
+          ${temaClaro ? "bg-white border-zinc-200" : "bg-[#0b0b0b] border-zinc-800"}
         `}
       >
-        <div className="flex items-center justify-between mb-7">
-          <h2 className="text-2xl font-semibold">Novo usuário</h2>
+        <h2 className="text-2xl font-semibold mb-6">Novo usuário</h2>
 
-          <button
-            type="button"
-            onClick={fecharModal}
-            className={`
-              w-10 h-10 rounded-full border flex items-center justify-center transition
-              ${temaClaro ? "border-zinc-300 hover:text-sky-400" : "border-zinc-800 hover:text-sky-400"}
-            `}
-          >
-            ✕
-          </button>
-        </div>
+        <div className="flex flex-col gap-4">
 
-        <div className="flex flex-col gap-5">
           <input
-            type="text"
             placeholder="Nome completo"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className={`w-full h-14 rounded-2xl px-4 ${
+            className={`h-12 px-4 rounded-xl ${
               temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
             }`}
           />
 
           <input
-            type="email"
             placeholder="E-mail institucional"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`w-full h-14 rounded-2xl px-4 ${
+            className={`h-12 px-4 rounded-xl ${
               temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
             }`}
           />
 
           <input
-            type="text"
             placeholder="CPF"
             value={cpf}
             onChange={(e) => setCpf(e.target.value)}
-            className={`w-full h-14 rounded-2xl px-4 ${
+            className={`h-12 px-4 rounded-xl ${
               temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
             }`}
           />
@@ -159,11 +138,12 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
-            className={`w-full h-14 rounded-2xl px-4 ${
+            className={`h-12 px-4 rounded-xl ${
               temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
             }`}
           />
 
+          {/* senha status */}
           <div>
             <div className={`w-full h-[6px] rounded-full overflow-hidden ${
               temaClaro ? "bg-zinc-300" : "bg-zinc-800"
@@ -178,34 +158,25 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
             </p>
           </div>
 
+          {/* 🔥 CARGO SEM ADMIN */}
           <select
             value={cargo}
             onChange={(e) => setCargo(e.target.value)}
-            className={`w-full h-14 rounded-2xl px-4 ${
+            className={`h-12 px-4 rounded-xl ${
               temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
             }`}
           >
-            <option value="DELEGADO">Delegado</option>
-            <option value="PERITO">Perito</option>
+            <option value="">Selecione o cargo</option>
+            <option value="PADRAO">Padrão</option>
           </select>
 
-          <div className={`
-            rounded-2xl p-4 text-sm
-            ${temaClaro
-              ? "bg-red-100 border border-red-200 text-red-500"
-              : "bg-red-500/10 border border-red-500/20 text-red-400"
-            }
-          `}>
-            Não é permitido cadastrar administradores pela interface.
-          </div>
-
           <button
-            type="button"
             onClick={criarUsuario}
-            className="w-full h-14 rounded-2xl bg-sky-400 text-black font-medium hover:opacity-90 transition"
+            className="h-12 rounded-xl bg-sky-400 text-black font-medium hover:opacity-90 transition"
           >
             Criar usuário
           </button>
+
         </div>
       </div>
     </div>
