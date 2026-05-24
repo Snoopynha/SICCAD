@@ -10,61 +10,62 @@ export default function FiltersBar({
   setOrdenacao
 }) {
   const baseSelect = `
-    h-[52px]
+    h-[48px]
     w-[240px]
-    px-6
-    pr-12
-    rounded-full
+    px-5 pr-10
+    rounded-[14px]
     border
     outline-none
-    transition-none
-    appearance-none
     cursor-pointer
+    appearance-none
+    text-sm
+    transition-all
     focus:outline-none
-    focus:ring-0
-    focus:shadow-none
   `;
 
   const themeSelect = temaClaro
-    ? "bg-[#eceff4] border-zinc-200 text-black"
+    ? "bg-[#f4f6f8] border-zinc-200 text-black"
     : "bg-[#0a0a0a] border-zinc-800 text-white";
 
   const inputBase = `
-    w-full h-[58px] rounded-full
-    px-6
-    text-[16px]
-    border outline-none
-    transition-none
+    w-full h-[52px]
+    rounded-[16px]
+    px-5 pl-12
+    text-[15px]
+    border
+    outline-none
+    transition-all
     focus:outline-none
-    focus:ring-0
-    focus:shadow-none
   `;
 
   const inputTheme = temaClaro
-    ? "bg-[#eceff4] border-zinc-200 text-black"
+    ? "bg-[#f4f6f8] border-zinc-200 text-black"
     : "bg-[#0a0a0a] border-zinc-800 text-white";
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-5">
 
       <div className="relative w-full">
+
         <Search
-          size={22}
-          className="absolute right-7 top-1/2 -translate-y-1/2 text-zinc-500"
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
         />
 
         <input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           type="text"
-          placeholder="Digite número do processo, título ou participante"
+          placeholder="Buscar processo, título ou participante..."
           className={`${inputBase} ${inputTheme}`}
         />
+
       </div>
 
-      <div className="flex flex-col items-end gap-4">
+      <div className="flex flex-col items-end gap-3">
 
         <div className="relative w-[240px]">
+
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -72,23 +73,25 @@ export default function FiltersBar({
           >
 
             <option value="" disabled hidden>
-              Todos status
+              Status
             </option>
 
             <option value="ABERTO">Aberto</option>
-            <option value="EM_ANDAMENTO">Em andamento</option>
+            <option value="EM_PERICIA">Em andamento</option>
             <option value="CONCLUIDO">Concluído</option>
             <option value="ARQUIVADO">Arquivado</option>
 
           </select>
 
           <ChevronDown
-            size={18}
-            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500"
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
           />
+
         </div>
 
         <div className="relative w-[240px]">
+
           <select
             value={ordenacao}
             onChange={(e) => setOrdenacao(e.target.value)}
@@ -96,7 +99,7 @@ export default function FiltersBar({
           >
 
             <option value="" disabled hidden>
-              Ordenar por data
+              Ordenar
             </option>
 
             <option value="recentes">Mais recentes</option>
@@ -105,9 +108,10 @@ export default function FiltersBar({
           </select>
 
           <ChevronDown
-            size={18}
-            className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500"
+            size={16}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none"
           />
+
         </div>
 
       </div>

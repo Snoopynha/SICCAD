@@ -1,3 +1,5 @@
+// src/components/Admin/CreateUserModal.jsx
+
 import { useState } from "react";
 
 export default function CreateUserModal({ temaClaro, fecharModal }) {
@@ -27,8 +29,8 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       return {
         texto: "Senha forte",
         largura: "w-full",
-        corTexto: "text-green-400",
-        corBg: "bg-green-400"
+        corTexto: "text-emerald-400",
+        corBg: "bg-emerald-400"
       };
     }
 
@@ -36,16 +38,16 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       return {
         texto: "Senha média",
         largura: "w-2/3",
-        corTexto: "text-yellow-400",
-        corBg: "bg-yellow-400"
+        corTexto: "text-amber-400",
+        corBg: "bg-amber-400"
       };
     }
 
     return {
       texto: "Senha fraca",
       largura: "w-1/3",
-      corTexto: "text-red-400",
-      corBg: "bg-red-400"
+      corTexto: "text-rose-400",
+      corBg: "bg-rose-400"
     };
   }
 
@@ -57,26 +59,17 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       return;
     }
 
-    const payload = {
-      nome,
-      email,
-      cpf,
-      senha,
-      cargo
-    };
+    const payload = { nome, email, cpf, senha, cargo };
 
     try {
       const res = await fetch("http://localhost:8080/api/usuarios", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
         const erro = await res.text();
-        console.log("Erro da API:", erro);
         alert(`Erro ao criar usuário: ${erro}`);
         return;
       }
@@ -84,7 +77,6 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       await res.json();
       fecharModal();
     } catch (err) {
-      console.log("Erro de conexão:", err);
       alert("Erro ao conectar no backend.");
     }
   }
@@ -92,13 +84,12 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
   return (
     <div
       onClick={fecharModal}
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-5 z-[999]"
+      className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-5 z-[999]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
         className={`
-          w-full max-w-[520px] rounded-[32px] border p-8 shadow-2xl
-          transition-all duration-300
+          w-full max-w-[520px] rounded-3xl border p-8 shadow-2xl
           ${temaClaro ? "bg-white border-zinc-200" : "bg-[#0b0b0b] border-zinc-800"}
         `}
       >
@@ -110,27 +101,21 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
             placeholder="Nome completo"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className={`h-12 px-4 rounded-xl ${
-              temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
-            }`}
+            className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           />
 
           <input
             placeholder="E-mail institucional"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={`h-12 px-4 rounded-xl ${
-              temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
-            }`}
+            className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           />
 
           <input
             placeholder="CPF"
             value={cpf}
             onChange={(e) => setCpf(e.target.value)}
-            className={`h-12 px-4 rounded-xl ${
-              temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
-            }`}
+            className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           />
 
           <input
@@ -138,33 +123,22 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
-            className={`h-12 px-4 rounded-xl ${
-              temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
-            }`}
+            className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           />
 
-          {/* senha status */}
           <div>
-            <div className={`w-full h-[6px] rounded-full overflow-hidden ${
-              temaClaro ? "bg-zinc-300" : "bg-zinc-800"
-            }`}>
-              <div
-                className={`h-full transition-all duration-300 ${statusSenha.largura} ${statusSenha.corBg}`}
-              />
+            <div className={`w-full h-2 rounded-full overflow-hidden ${temaClaro ? "bg-zinc-200" : "bg-zinc-800"}`}>
+              <div className={`h-full transition-all ${statusSenha.largura} ${statusSenha.corBg}`} />
             </div>
-
             <p className={`text-xs mt-2 ${statusSenha.corTexto}`}>
               {statusSenha.texto}
             </p>
           </div>
 
-          {/* 🔥 CARGO SEM ADMIN */}
           <select
             value={cargo}
             onChange={(e) => setCargo(e.target.value)}
-            className={`h-12 px-4 rounded-xl ${
-              temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"
-            }`}
+            className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           >
             <option value="">Selecione o cargo</option>
             <option value="PADRAO">Padrão</option>
@@ -172,7 +146,7 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
 
           <button
             onClick={criarUsuario}
-            className="h-12 rounded-xl bg-sky-400 text-black font-medium hover:opacity-90 transition"
+            className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold "
           >
             Criar usuário
           </button>

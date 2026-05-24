@@ -1,79 +1,80 @@
-import { LogOut, Search, Moon, Sun } from "lucide-react";
+import { LogOut, Moon, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-export default function AdminHeader({
+export default function Header({
   temaClaro,
-  setTemaClaro
+  setTemaClaro,
+  usuario,
 }) {
+  const navigate = useNavigate();
+  const [idioma, setIdioma] = useState("pt");
 
-  const [idioma, setIdioma] = useState("PT");
+  function toggleIdioma() {
+    setIdioma((prev) => (prev === "pt" ? "en" : "pt"));
+  }
+
+  function logout() {
+    localStorage.removeItem("usuario");
+    localStorage.removeItem("token");
+    navigate("/");
+  }
+
+  const btnBase = `
+    w-[40px] h-[40px]
+    rounded-[10px]
+    border
+    flex items-center justify-center
+    transition-all
+  `;
+
+  const btnTheme = temaClaro
+    ? "bg-white border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+    : "bg-[#0b0b0b] border-zinc-700 text-zinc-300 hover:bg-zinc-900";
 
   return (
+    <header className="flex items-center justify-between flex-wrap gap-4 mb-6 w-full">
 
-    <div className="flex items-center justify-between mb-8">
+      {/* ESQUERDA (LOGO + USER) */}
+      <div className="flex items-center gap-4">
 
-      {/* SEARCH */}
-      <div className="relative w-[450px]">
-
-        <Search
-          size={16}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500"
+        {/* LOGO */}
+        <img
+         
         />
 
-        <input
-          type="text"
-          placeholder={idioma === "PT" ? "Buscar usuário..." : "Search user..."}
-          className={`
-            w-full h-10 rounded-full pl-10 pr-4 text-sm outline-none transition-all
-
-            ${temaClaro
-              ? "bg-white border border-zinc-300 text-black"
-              : "bg-[#101010] border border-zinc-800 text-white"
-            }
-          `}
-        />
+      
 
       </div>
 
-      {/* ACTIONS */}
-      <div className="flex items-center gap-3">
+      {/* DIREITA (BOTÕES) */}
+      <div className="flex items-center gap-2">
 
-        {/* IDIOMA */}
-        <button className={`
-          h-10 px-4 rounded-full border text-sm transition
-
-          ${temaClaro
-            ? "border-zinc-300 hover:bg-zinc-100"
-            : "border-zinc-800 hover:bg-zinc-900"
-          }
-        `}>
-          {idioma}
+        {/* idioma */}
+        <button
+          onClick={toggleIdioma}
+          className={`${btnBase} ${btnTheme} text-[12px] font-semibold`}
+        >
+          {idioma.toUpperCase()}
         </button>
 
-        {/* TEMA (ICON ONLY) */}
+        {/* tema */}
         <button
           onClick={() => setTemaClaro(!temaClaro)}
-          className={`
-            h-10 w-10 rounded-full border flex items-center justify-center transition
-
-            ${temaClaro
-              ? "border-zinc-300 hover:bg-zinc-100"
-              : "border-zinc-800 hover:bg-zinc-900"
-            }
-          `}
+          className={`${btnBase} ${btnTheme}`}
         >
-          {temaClaro ? <Moon size={16} /> : <Sun size={16} />}
+          {temaClaro ? <Moon size={15} /> : <Sun size={15} />}
         </button>
 
-        {/* LOGOUT */}
-        <button className="h-10 px-4 rounded-full bg-red-500 hover:bg-red-400 transition text-sm font-medium flex items-center gap-2 text-white">
+        {/* logout */}
+        <button
+          onClick={logout}
+          className={`${btnBase} ${btnTheme} hover:text-red-400`}
+        >
           <LogOut size={15} />
-          {idioma === "PT" ? "Sair" : "Logout"}
         </button>
 
       </div>
-
-    </div>
-
+    </header>
   );
 }

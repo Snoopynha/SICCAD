@@ -1,101 +1,82 @@
-const coresAvatar = [
+const cores = [
   "bg-sky-500",
-  "bg-emerald-500",
-  "bg-violet-500",
-  "bg-rose-500",
-  "bg-amber-500",
+  "bg-cyan-500",
   "bg-indigo-500",
-  "bg-cyan-500"
+  "bg-violet-500",
+  "bg-emerald-500",
+  "bg-rose-500",
+  "bg-amber-500"
 ];
 
-function gerarCor(nome) {
+function pegarCor(nome = "") {
   let soma = 0;
-
   for (let i = 0; i < nome.length; i++) {
     soma += nome.charCodeAt(i);
   }
-
-  return coresAvatar[soma % coresAvatar.length];
+  return cores[soma % cores.length];
 }
 
-export default function UsersList({ usuarios }) {
+function inicial(nome = "") {
+  return nome.charAt(0).toUpperCase();
+}
 
+export default function UsersList({
+  usuarios,
+  temaClaro,
+  idioma,
+  onClick
+}) {
   return (
+    <>
+      {usuarios.map((u) => (
+        <div
+          key={u.id}
+          onClick={() => onClick(u)}
+          className={`
+            cursor-pointer rounded-2xl border p-4
+            
+            ${temaClaro
+              ? "bg-white border-zinc-200"
+              : "bg-[#0f0f0f] border-zinc-800"}
+          `}
+        >
 
-    <div className="flex flex-col gap-[14px]">
+          <div className="flex items-center justify-between">
 
-      {usuarios.map(usuario => {
+            <div className="flex items-center gap-3">
 
-        const cor = gerarCor(usuario.nome);
-
-        return (
-
-          <div
-            key={usuario.id}
-            className="
-              border border-zinc-800
-              rounded-[22px]
-              p-[18px]
-              flex items-center justify-between
-              hover:border-sky-400 transition
-              cursor-pointer
-            "
-          >
-
-            {/* LEFT */}
-            <div className="flex items-center gap-[14px]">
-
-              {/* AVATAR */}
               <div className={`
-                w-[48px] h-[48px] rounded-full
+                w-10 h-10 rounded-full
                 flex items-center justify-center
-                font-bold text-white
-                ${cor}
+                text-white font-bold shadow-lg
+                ${pegarCor(u.nome)}
               `}>
-                {usuario.nome
-                  .split(" ")
-                  .map(n => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .slice(0, 2)}
+                {inicial(u.nome)}
               </div>
 
-              {/* INFO */}
               <div>
-
-                <div className="text-[15px] font-semibold">
-                  {usuario.nome}
-                </div>
-
-                <div className="text-[13px] text-zinc-400">
-                  {usuario.email}
-                </div>
-
+                <div className="font-semibold">{u.nome}</div>
+                <div className="text-xs text-zinc-400">{u.email}</div>
               </div>
 
             </div>
 
-            {/* CARGO FLAG */}
-            <div className={`
-              text-[11px]
-              px-3 py-[4px]
-              rounded-full
-              border font-medium
-
-              ${usuario.cargo === "DELEGADO"
-                ? "bg-sky-400/10 text-sky-400 border-sky-400/20"
-                : "bg-violet-400/10 text-violet-300 border-violet-400/20"
-              }
-            `}>
-              {usuario.cargo}
+            <div className="
+              text-xs px-3 py-1 rounded-full
+              border border-zinc-700
+              text-zinc-300
+            ">
+              {u.cargo}
             </div>
 
           </div>
 
-        );
-      })}
+          <div className="mt-3 text-xs text-zinc-400">
+            {u.casos?.length || 0} {idioma === "PT" ? "casos" : "cases"}
+          </div>
 
-    </div>
-
+        </div>
+      ))}
+    </>
   );
 }

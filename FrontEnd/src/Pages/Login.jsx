@@ -8,17 +8,12 @@ import FooterActions from "../components/Login/FooterActions";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [mostrarSenha, setMostrarSenha] = useState(false);
-
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-
   const [erroEmail, setErroEmail] = useState("");
   const [erroSenha, setErroSenha] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [idioma, setIdioma] = useState("pt");
   const [temaClaro, setTemaClaro] = useState(false);
 
@@ -43,60 +38,59 @@ export default function Login() {
   }
 
   async function autenticar() {
-  setErroSenha("");
+    setErroSenha("");
 
-  if (!validarEmail(email)) {
-    setErroEmail("E-mail inválido.");
-    return;
-  }
-
-  if (senha.trim() === "") {
-    setErroSenha("Digite sua senha.");
-    return;
-  }
-
-  setLoading(true);
-
-  try {
-    const response = await fetch(
-      "http://localhost:8080/api/usuarios/autenticar",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, senha }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      setErroSenha(data?.message || "Falha na autenticação.");
-      setLoading(false);
+    if (!validarEmail(email)) {
+      setErroEmail("E-mail inválido.");
       return;
     }
 
-    const usuario = data;
+    if (senha.trim() === "") {
+      setErroSenha("Digite sua senha.");
+      return;
+    }
 
-    console.log("LOGIN OK:", usuario);
+    setLoading(true);
 
-    localStorage.setItem("usuario", JSON.stringify(usuario));
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/usuarios/autenticar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, senha }),
+        }
+      );
 
-    setLoading(false);
+      const data = await response.json();
 
-    // 🔥 IMPORTANTE: deixa o Router decidir depois
-    window.location.href =
-      usuario?.tipo_global === "ADMIN"
-        ? "/admin"
-        : "/dashboard";
+      if (!response.ok) {
+        setErroSenha(data?.message || "Falha na autenticação.");
+        setLoading(false);
+        return;
+      }
 
-  } catch (error) {
-    setLoading(false);
-    setErroSenha("Erro ao conectar com o servidor.");
-    console.error(error);
+      const usuario = data;
+
+      console.log("LOGIN OK:", usuario);
+
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+
+      setLoading(false);
+
+      window.location.href =
+        usuario?.tipo_global === "ADMIN"
+          ? "/admin"
+          : "/dashboard";
+
+    } catch (error) {
+      setLoading(false);
+      setErroSenha("Erro ao conectar com o servidor.");
+      console.error(error);
+    }
   }
-}
   return (
     <div
       className={`w-full min-h-screen flex flex-col items-center justify-between px-6 py-5

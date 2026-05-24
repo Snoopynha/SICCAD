@@ -17,7 +17,6 @@ export default function NewCaseModal({
   }
 
   async function criarCaso() {
-
     if (!titulo || !descricao || !numeroProcesso || !dataOcorrencia) {
       alert("Preencha todos os campos");
       return;
@@ -58,84 +57,112 @@ export default function NewCaseModal({
       fechar();
 
     } catch (err) {
-      console.log("Erro conexão:", err);
+      console.log(err);
       setLoading(false);
       alert("Erro de conexão com servidor");
     }
   }
 
   const inputClass = `
-    w-full h-[54px] px-5 rounded-[16px] border outline-none
+    w-full h-[50px]
+    px-4 rounded-[14px]
+    border outline-none
+    text-[14px]
+    transition-all
     ${temaClaro
-      ? "bg-white text-black border-zinc-300"
-      : "bg-[#111] text-white border-zinc-700"}
+      ? "bg-white text-black border-zinc-200 focus:border-blue-400"
+      : "bg-[#111] text-white border-zinc-800 focus:border-blue-500"}
   `;
 
   const textareaClass = `
-    w-full h-[110px] px-5 py-3 rounded-[16px] border resize-none outline-none
+    w-full h-[100px]
+    px-4 py-3 rounded-[14px]
+    border resize-none outline-none
+    text-[14px]
+    transition-all
     ${temaClaro
-      ? "bg-white text-black border-zinc-300"
-      : "bg-[#111] text-white border-zinc-700"}
+      ? "bg-white text-black border-zinc-200 focus:border-blue-400"
+      : "bg-[#111] text-white border-zinc-800 focus:border-blue-500"}
   `;
 
   return (
-    <div className={`
-      fixed left-1/2 top-1/2
-      -translate-x-1/2 -translate-y-1/2
-      z-[2000]
-      w-[520px] max-[700px]:w-[92%]
-      max-h-[90vh] overflow-y-auto
-      rounded-[30px] border p-7
-      ${temaClaro
-        ? "bg-white border-zinc-200"
-        : "bg-[#0b0b0b] border-zinc-800"}
-    `}>
+    <>
+      <div
+        onClick={fechar}
+        className="
+          fixed inset-0 z-[1999]
+          bg-black/60 backdrop-blur-[4px]
+        "
+      />
 
-      <h2 className="text-[28px] font-bold mb-6">
-        Criar Novo Caso
-      </h2>
+      <div className={`
+        fixed left-1/2 top-1/2
+        -translate-x-1/2 -translate-y-1/2
+        z-[2000]
 
-      <div className="flex flex-col gap-4">
+        w-[480px] max-[600px]:w-[92%]
 
-        <input
-          value={titulo}
-          onChange={(e) => setTitulo(e.target.value)}
-          type="text"
-          placeholder="Título do caso"
-          className={inputClass}
-        />
+        rounded-[22px]
+        border
+        p-6
 
-        <textarea
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-          placeholder="Descrição do caso"
-          className={textareaClass}
-        />
+        shadow-2xl
 
-        <input
-          value={numeroProcesso}
-          onChange={(e) => setNumeroProcesso(e.target.value)}
-          type="text"
-          placeholder="Número do processo"
-          className={inputClass}
-        />
+        ${temaClaro
+          ? "bg-white border-zinc-200"
+          : "bg-[#0b0b0b] border-zinc-800"}
+      `}>
 
-        <input
-          value={dataOcorrencia}
-          onChange={(e) => setDataOcorrencia(e.target.value)}
-          type="date"
-          className={inputClass}
-        />
+        <h2 className="text-[22px] font-bold mb-5">
+          Criar novo caso
+        </h2>
 
-        <div className="flex justify-end gap-3 mt-2">
+        <div className="flex flex-col gap-3">
+
+          <input
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            type="text"
+            placeholder="Título"
+            className={inputClass}
+          />
+
+          <textarea
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            placeholder="Descrição"
+            className={textareaClass}
+          />
+
+          <input
+            value={numeroProcesso}
+            onChange={(e) => setNumeroProcesso(e.target.value)}
+            type="text"
+            placeholder="Número do processo"
+            className={inputClass}
+          />
+
+          <input
+            value={dataOcorrencia}
+            onChange={(e) => setDataOcorrencia(e.target.value)}
+            type="date"
+            className={inputClass}
+          />
+
+        </div>
+
+        <div className="flex justify-end gap-2 mt-5">
 
           <button
             onClick={fechar}
             className={`
-              h-[52px] px-6 rounded-[16px] border
+              h-[44px] px-4 rounded-[12px]
+              border text-sm
+              transition-all
+
               ${temaClaro
-                ? "border-zinc-300 text-black"
-                : "border-zinc-700 text-white"}
+                ? "border-zinc-300 hover:bg-zinc-50"
+                : "border-zinc-700 hover:bg-zinc-900"}
             `}
           >
             Cancelar
@@ -144,14 +171,20 @@ export default function NewCaseModal({
           <button
             onClick={criarCaso}
             disabled={loading}
-            className="h-[52px] px-6 rounded-[16px] bg-blue-600 text-white"
+            className="
+              h-[44px] px-5 rounded-[12px]
+              bg-blue-600 text-white
+              text-sm font-medium
+              transition-all
+              disabled:opacity-100
+            "
           >
-            {loading ? "Criando..." : "Criar Caso"}
+            {loading ? "Criando..." : "Criar"}
           </button>
 
         </div>
 
       </div>
-    </div>
+    </>
   );
 }

@@ -1,5 +1,3 @@
-// src/components/Dashboard/Modals/EvidenceModal.jsx
-
 import { X, Upload } from "lucide-react";
 
 export default function EvidenceModal({
@@ -10,7 +8,6 @@ export default function EvidenceModal({
   setArquivo,
   enviarEvidencia
 }) {
-
   return (
     <>
       <div
@@ -24,128 +21,102 @@ export default function EvidenceModal({
         `}
       />
 
-      <div className={`
-        fixed left-1/2 top-1/2
-        -translate-x-1/2 -translate-y-1/2
-        w-[560px] max-w-[92%]
-        rounded-[32px]
-        border z-[1999]
-        p-7 transition-all duration-300
-        ${aberto
-          ? "opacity-100 scale-100"
-          : "opacity-0 scale-90 pointer-events-none"}
-        ${temaClaro
-          ? "bg-white border-zinc-200 text-black"
-          : "bg-[#0b0b0b] border-zinc-800 text-white"}
-      `}>
+      <div
+        className={`
+          fixed left-1/2 top-1/2
+          -translate-x-1/2 -translate-y-1/2
+          w-[560px] max-w-[92%]
+          rounded-[28px]
+          border z-[1999]
+          p-6 transition-all duration-300
 
-        <div className="flex items-center justify-between mb-7">
+          ${aberto ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}
 
+          ${temaClaro
+            ? "bg-white border-zinc-200 text-black"
+            : "bg-[#0b0b0b] border-zinc-800 text-white"}
+        `}
+      >
+
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-
-            <Upload size={22} />
-
-            <h2 className="text-[24px] font-bold">
+            <Upload size={20} />
+            <h2 className="text-[20px] font-semibold">
               Nova Evidência
             </h2>
-
           </div>
 
-          <button onClick={fechar}>
-            <X />
+          <button
+            onClick={fechar}
+            className="opacity-70 hover:opacity-100 transition"
+          >
+            <X size={18} />
           </button>
-
         </div>
 
-        <label className={`
-          border-2 border-dashed
-          rounded-[24px]
-          p-14 text-center block cursor-pointer
-          transition-all
-          ${temaClaro
-            ? "border-zinc-300"
-            : "border-zinc-700"}
-        `}>
+        <label
+          className={`
+            relative flex flex-col items-center justify-center
+            border-2 border-dashed
+            rounded-[20px]
+            p-10
+            cursor-pointer
+            transition-all
 
+            hover:border-blue-500 hover:bg-blue-500/5
+
+            ${temaClaro
+              ? "border-zinc-300"
+              : "border-zinc-700"}
+          `}
+        >
           <input
             type="file"
-            hidden
-            onChange={(e) =>
-              setArquivo(
-                e.target.files[0]
-              )
-            }
+            className="hidden"
+            onChange={(e) => setArquivo(e.target.files[0])}
           />
 
-          <Upload
-            size={42}
-            className="
-              mx-auto mb-4
-              text-blue-500
-            "
-          />
+          <Upload size={36} className="text-blue-500 mb-3" />
 
-          <p className="text-[16px] mb-2">
-
+          <p className="text-[15px] text-center font-medium">
             {arquivo
               ? arquivo.name
-              : "Arraste um arquivo ou clique para selecionar"}
-
+              : "Clique ou arraste um arquivo aqui"}
           </p>
 
-          <span className="
-            text-zinc-500
-            text-[14px]
-          ">
-            PDF, PNG ou JPG — máximo 50MB
+          <span className="text-[12px] text-zinc-500 mt-1">
+            PDF, PNG ou JPG • até 50MB
           </span>
-
         </label>
 
         {arquivo && (
+          <div
+            className={`
+              mt-4 p-4 rounded-[16px]
+              border text-sm
 
-          <div className={`
-            mt-5
-            p-4
-            rounded-[20px]
-            border
-            ${temaClaro
-              ? "border-zinc-200 bg-zinc-50"
-              : "border-zinc-800 bg-[#090909]"}
-          `}>
-
-            <p className="font-medium">
-              {arquivo.name}
+              ${temaClaro
+                ? "border-zinc-200 bg-zinc-50"
+                : "border-zinc-800 bg-[#111]"}
+            `}
+          >
+            <p className="font-medium">{arquivo.name}</p>
+            <p className="text-zinc-500 text-xs mt-1">
+              {(arquivo.size / 1024 / 1024).toFixed(2)} MB
             </p>
-
-            <p className="
-              text-zinc-500
-              text-[13px]
-              mt-1
-            ">
-              {(arquivo.size / 1024 / 1024)
-                .toFixed(2)} MB
-            </p>
-
           </div>
-
         )}
 
-        <div className="
-          flex justify-end gap-3
-          mt-6
-        ">
+        <div className="flex justify-end gap-3 mt-6">
 
           <button
             onClick={fechar}
             className={`
-              h-[48px]
-              px-5
-              rounded-[16px]
-              border
+              h-[44px] px-5 rounded-[14px] border text-sm
+
               ${temaClaro
-                ? "bg-[#f4f4f5] border-zinc-200"
-                : "bg-[#111111] border-zinc-800"}
+                ? "border-zinc-200 hover:bg-zinc-100"
+                : "border-zinc-800 hover:bg-zinc-900"}
             `}
           >
             Cancelar
@@ -154,21 +125,16 @@ export default function EvidenceModal({
           <button
             onClick={enviarEvidencia}
             className="
-              h-[48px]
-              px-5
-              rounded-[16px]
-              bg-blue-600
-              hover:bg-blue-700
+              h-[44px] px-5 rounded-[14px]
+              bg-blue-600 hover:bg-blue-700
+              text-white text-sm font-medium
               transition-all
-              text-white
-              font-semibold
             "
           >
-            Enviar Evidência
+            Enviar
           </button>
 
         </div>
-
       </div>
     </>
   );

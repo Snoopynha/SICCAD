@@ -1,13 +1,5 @@
-// src/components/Dashboard/DetailsPanel.jsx
-
-import {
-  X,
-  Users,
-  Shield,
-  FileText,
-  Download,
-  SearchCheck
-} from "lucide-react";
+import {X, Users, Shield, FileText, MoreVertical} from "lucide-react";
+import { useState } from "react";
 
 export default function DetailsPanel({
   temaClaro,
@@ -26,32 +18,106 @@ export default function DetailsPanel({
   concluirCaso,
   arquivarCaso,
   reabrirCaso,
-  usuarioLogadoId
+  usuarioLogadoId,
+  transferirCustodia,
+  aceitarCustodia,
+  analisarCustodia,
+  devolverCustodia,
+  descartarCustodia,
 }) {
 
+  const [menuAberto, setMenuAberto] = useState(null);
+
+  function corAvatar(nome) {
+    if (!nome) return ["#6b7280", "#6b7280"];
+
+    const cores = [
+      ["#ef4444", "#f97316"],
+      ["#f97316", "#eab308"],
+      ["#eab308", "#22c55e"],
+      ["#22c55e", "#06b6d4"],
+      ["#06b6d4", "#3b82f6"],
+      ["#3b82f6", "#8b5cf6"],
+      ["#8b5cf6", "#ec4899"],
+      ["#ec4899", "#ef4444"],
+    ];
+
+    let hash = 0;
+
+    for (let i = 0; i < nome.length; i++) {
+      hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    return cores[Math.abs(hash) % cores.length];
+  }
+
   function formatarData(data) {
-
     if (!data) return "-";
-
     return new Date(data).toLocaleString("pt-BR");
-
   }
 
   function formatarStatus(status) {
 
-    if (status === "EM_PERICIA")
-      return "EM ANDAMENTO";
+    const s = String(status || "").toUpperCase();
 
-    if (status === "CONCLUIDO")
-      return "CONCLUÍDO";
+    switch (s) {
 
-    return status;
+      case "ABERTO":
+        return "ABERTO";
 
+      case "EM_ANDAMENTO":
+        return "EM ANDAMENTO";
+
+      case "EM_PERICIA":
+        return "EM PERÍCIA";
+
+      case "CONCLUIDO":
+        return "CONCLUÍDO";
+
+      case "ARQUIVADO":
+        return "ARQUIVADO";
+
+      case "APREENDIDA":
+        return "APREENDIDA";
+
+      case "EM_ANALISE":
+      case "ANALISE":
+        return "ANÁLISE";
+
+      case "DEVOLVIDA":
+        return "DEVOLVIDA";
+
+      case "DESCARTADA":
+      case "DESCARTE":
+        return "DESCARTE";
+
+      case "TRANSFERIDA":
+      case "TRANSFERENCIA":
+        return "TRANSFERÊNCIA";
+
+      case "RECEBIMENTO":
+        return "RECEBIMENTO";
+
+      default:
+        return status;
+    }
+
+  }
+
+  function pegarInicial(nome) {
+    if (!nome) return "?";
+    return nome.charAt(0).toUpperCase();
   }
 
   const podeConcluir =
     caso?.status === "EM_ANDAMENTO" ||
     caso?.status === "EM_PERICIA";
+
+  const historicoOrdenado = [...(historico || [])].sort((a, b) => {
+    const dataA = new Date(a.dataEvento || a.dataCriacao || 0);
+    const dataB = new Date(b.dataEvento || b.dataCriacao || 0);
+    return dataB - dataA;
+  });
 
   return (
     <>
@@ -69,10 +135,10 @@ export default function DetailsPanel({
       <div className={`
         fixed top-0
         ${aberto ? "right-0" : "-right-[100%]"}
-        w-[900px] max-[1200px]:w-full
+        w-[820px] max-[1200px]:w-full
         h-screen z-[1000]
         overflow-y-auto transition-all duration-300
-        p-8 border-l
+        p-6 border-l
         ${temaClaro
           ? "bg-white border-zinc-200 text-black"
           : "bg-[#0b0b0b] border-zinc-800 text-white"}
@@ -81,69 +147,58 @@ export default function DetailsPanel({
         <button
           onClick={fechar}
           className={`
-            w-[48px] h-[48px]
-            rounded-[16px]
-            border mb-7
+            w-[42px] h-[42px]
+            rounded-[12px]
+            border mb-5
             flex items-center justify-center
             ${temaClaro
               ? "border-zinc-200 bg-[#f4f4f5]"
               : "border-zinc-800 bg-[#111111]"}
           `}
         >
-          <X size={18} />
+          <X size={16} />
         </button>
 
-        <h1 className="text-[30px] font-bold mb-3">
+        <h1 className="text-[24px] font-bold mb-1">
           {caso?.titulo}
         </h1>
 
-        <p className="text-zinc-500 mb-4">
+        <p className="text-zinc-500 text-[13px] mb-3">
           {caso?.descricao}
         </p>
 
-        <div className="mb-8">
+        <span className="inline-block px-3 py-1 rounded-full text-[12px] bg-blue-600/10 text-blue-400 mb-6">
+          {formatarStatus(caso?.status)}
+        </span>
 
-          <span className="
-            px-4 py-2 rounded-full
-            bg-blue-600/10 text-blue-400
-            text-[13px] font-semibold
-          ">
-            {formatarStatus(caso?.status)}
-          </span>
-
-        </div>
-
-        {/* AÇÕES */}
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 mb-6">
 
           <button
             onClick={iniciarPericia}
             disabled={caso?.status !== "ABERTO"}
             className={`
-              h-[48px] px-5 rounded-[16px]
-              text-white transition-all
-              ${
-                caso?.status === "ABERTO"
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-zinc-700 cursor-not-allowed opacity-40"
+            h-[40px] px-4 rounded-[12px]
+            text-sm transition-all
+            ${caso?.status === "ABERTO"
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700"
               }
-            `}
+          `}
           >
-            Iniciar Perícia
+            Iniciar
           </button>
 
           <button
             onClick={concluirCaso}
             disabled={!podeConcluir}
             className={`
-              h-[48px] px-5 rounded-[16px]
-              border transition-all
-              ${
-                podeConcluir
-                  ? "border-zinc-500 hover:border-blue-500"
-                  : "border-zinc-800 opacity-40 cursor-not-allowed"
+            h-[40px] px-4 rounded-[12px]
+            text-sm transition-all border
+            ${podeConcluir
+                ? "border-zinc-600 hover:border-blue-500 text-white"
+                : "border-zinc-800 text-zinc-500 cursor-not-allowed bg-[#111111]"
               }
-            `}
+          `}
           >
             Concluir
           </button>
@@ -152,14 +207,13 @@ export default function DetailsPanel({
             onClick={arquivarCaso}
             disabled={caso?.status !== "CONCLUIDO"}
             className={`
-              h-[48px] px-5 rounded-[16px]
-              border transition-all
-              ${
-                caso?.status === "CONCLUIDO"
-                  ? "border-zinc-500 hover:border-blue-500"
-                  : "border-zinc-800 opacity-40 cursor-not-allowed"
+            h-[40px] px-4 rounded-[12px]
+            text-sm transition-all border
+            ${caso?.status === "CONCLUIDO"
+                ? "border-zinc-600 hover:border-blue-500 text-white"
+                : "border-zinc-800 text-zinc-500 cursor-not-allowed bg-[#111111]"
               }
-            `}
+          `}
           >
             Arquivar
           </button>
@@ -168,302 +222,316 @@ export default function DetailsPanel({
             onClick={reabrirCaso}
             disabled={caso?.status !== "ARQUIVADO"}
             className={`
-              h-[48px] px-5 rounded-[16px]
-              border transition-all
-              ${
-                caso?.status === "ARQUIVADO"
-                  ? "border-zinc-500 hover:border-blue-500"
-                  : "border-zinc-800 opacity-40 cursor-not-allowed"
+            h-[40px] px-4 rounded-[12px]
+            text-sm transition-all border
+            ${caso?.status === "ARQUIVADO"
+                ? "border-zinc-600 hover:border-blue-500 text-white"
+                : "border-zinc-800 text-zinc-500 cursor-not-allowed bg-[#111111]"
               }
-            `}
+          `}
           >
             Reabrir
           </button>
 
         </div>
+        <div className={`rounded-[16px] border p-4 mb-4 ${temaClaro
+          ? "border-zinc-100 bg-zinc-50"
+          : "border-zinc-900 bg-[#0f0f0f]"
+          }`}>
 
-        {/* PARTICIPANTES */}
-        <div className={`
-          rounded-[28px]
-          border
-          p-6
-          mb-6
-          ${temaClaro
-            ? "border-zinc-200"
-            : "border-zinc-800"}
-        `}>
-
-          <div className="flex items-center justify-between mb-6">
-
-            <div className="flex items-center gap-3">
-
-              <Users size={20} />
-
-              <h2 className="text-[20px] font-bold">
-                Participantes
-              </h2>
-
+          <div className="flex justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Users size={16} />
+              <h2>Participantes</h2>
             </div>
 
             <button
               onClick={abrirParticipante}
-              className="
-                h-[46px]
-                px-5
-                rounded-[16px]
-                bg-blue-600
-                text-white
-              "
+              className="h-[34px] px-3 text-sm bg-blue-600 text-white rounded-[10px]"
             >
-              Adicionar
+              + Vincular
             </button>
-
           </div>
 
-          {!participantes.length && (
-            <p className="text-zinc-500">
-              Nenhum participante.
+          {participantes?.length === 0 && (
+            <p className="text-zinc-500 text-sm">
+              Nenhum participante
             </p>
           )}
 
-          {participantes.map((p, index) => {
+          {participantes?.map((p, i) => {
 
-            const ehUsuarioLogado =
-              Number(p.idUsuario) ===
-              Number(usuarioLogadoId);
+            const self =
+              Number(p.idUsuario) === Number(usuarioLogadoId);
 
             return (
-
               <div
-                key={index}
-                className={`
-                  p-5
-                  rounded-[22px]
-                  border
-                  mb-4
-                  flex items-center justify-between
-                  ${temaClaro
-                    ? "border-zinc-200"
-                    : "border-zinc-800"}
-                `}
+                key={i}
+                className="flex justify-between p-3 mb-2 rounded-[12px] bg-[#141414]"
               >
 
-                <div>
+                <div className="flex items-center gap-3">
 
-                  <h4 className="font-semibold text-[17px]">
-                    {p.nomeUsuario}
-                  </h4>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white"
+                    style={{
+                      background: `linear-gradient(
+                        135deg,
+                        ${corAvatar(p.nomeUsuario)[0]},
+                        ${corAvatar(p.nomeUsuario)[1]}
+                      )`
+                    }}
+                  >
+                    {pegarInicial(p.nomeUsuario)}
+                  </div>
 
-                  <p className="text-zinc-500 text-[14px]">
-                    {p.papel}
-                  </p>
-
+                  <div>
+                    <p>{p.nomeUsuario}</p>
+                    <p className="text-zinc-500 text-sm">
+                      {p.papel}
+                    </p>
+                  </div>
                 </div>
 
                 <button
-                  disabled={ehUsuarioLogado}
-                  onClick={() =>
-                    removerParticipante(p.idUsuario)
-                  }
-                  className={`
-                    h-[44px]
-                    px-5
-                    rounded-[14px]
-                    border transition-all
-                    ${
-                      ehUsuarioLogado
-                        ? "opacity-40 cursor-not-allowed"
-                        : "hover:border-red-500"
-                    }
-                    ${temaClaro
-                      ? "border-zinc-300"
-                      : "border-zinc-700"}
-                  `}
+                  disabled={self}
+                  onClick={() => removerParticipante(p.idUsuario)}
                 >
-                  {ehUsuarioLogado
-                    ? "Você"
-                    : "Remover"}
+                  {self ? "Você" : "Desvincular"}
                 </button>
 
               </div>
-
             );
-
           })}
-
         </div>
+        <div className="rounded-[16px] p-4 mb-4">
 
-        {/* EVIDÊNCIAS */}
-        <div className={`
-          rounded-[28px]
-          border
-          p-6
-          mb-6
-          ${temaClaro
-            ? "border-zinc-200"
-            : "border-zinc-800"}
-        `}>
-
-          <div className="flex items-center justify-between mb-6">
-
-            <div className="flex items-center gap-3">
-
-              <FileText size={20} />
-
-              <h2 className="text-[24px] font-bold">
-                Evidências
-              </h2>
-
+          <div className="flex justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FileText size={16} />
+              <h2>Evidências</h2>
             </div>
 
             <button
               onClick={abrirEvidencia}
-              className="
-                h-[46px]
-                px-5
-                rounded-[16px]
-                bg-blue-600
-                text-white
-              "
+              className="h-[34px] px-3 bg-blue-600 text-white rounded-[10px]"
             >
-              Nova Evidência
+              + Upload
             </button>
-
           </div>
 
-          {!evidencias.length && (
-            <p className="text-zinc-500">
-              Nenhuma evidência cadastrada.
+          {evidencias?.length === 0 && (
+            <p className="text-zinc-500 text-sm">
+              Nenhuma evidência
             </p>
           )}
 
-          {evidencias.map((evidencia) => (
+          {evidencias?.map((e) => {
 
-            <div
-              key={evidencia.id}
-              className={`
-                p-5
-                rounded-[22px]
-                border
-                mb-4
-                flex justify-between
-                ${temaClaro
-                  ? "border-zinc-200"
-                  : "border-zinc-800"}
-              `}
-            >
+            const resultado =
+              e.resultadoIntegridade ||
+              (e.integro === true
+                ? "OK"
+                : e.integro === false
+                  ? "ALTERADO"
+                  : null);
 
-              <div>
+            return (
+              <div
+                key={e.id}
+                className="p-4 mb-3 rounded-[16px] bg-[#141414] relative"
+              >
 
-                <h4 className="font-semibold">
-                  {evidencia.nomeArquivo}
-                </h4>
+                <div className="flex justify-between items-start">
 
-                <p className="text-zinc-500 text-[14px]">
-                  Hash: {evidencia.hashArquivo}
+                  <div>
+
+                    <p className="font-medium text-[15px] mb-1">
+                      {e.nomeOriginalArquivo || e.nomeArquivo}
+                    </p>
+
+                    {resultado && (
+                      <p className={`text-xs ${resultado === "OK"
+                        ? "text-green-500"
+                        : "text-red-500"
+                        }`}>
+                        {resultado === "OK"
+                          ? "✔ Arquivo íntegro"
+                          : "✖ Arquivo alterado"}
+                      </p>
+                    )}
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setMenuAberto(
+                        menuAberto === e.id ? null : e.id
+                      )
+                    }
+                    className="w-9 h-9 rounded-[10px] bg-[#1c1c1c] flex items-center justify-center"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+
+                </div>
+                {menuAberto === e.id && (
+                  <div className="
+                    absolute right-4 top-14
+                    w-[220px]
+                    rounded-[14px]
+                    bg-[#101010]
+                    border border-zinc-800
+                    shadow-2xl
+                    p-2
+                    z-50
+                  ">
+
+                    <button
+                      onClick={() => {
+                        verificarIntegridade(e.id);
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Verificar integridade
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        baixarArquivo(e.id);
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Download
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        transferirCustodia(
+                          e.id,
+                          prompt("ID destino"),
+                          prompt("Justificativa")
+                        );
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Transferir custódia
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        aceitarCustodia(e.id);
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Aceitar custódia
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        analisarCustodia(
+                          e.id,
+                          prompt("Justificativa")
+                        );
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Analisar evidência
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        devolverCustodia(
+                          e.id,
+                          prompt("Justificativa")
+                        );
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] hover:bg-[#1a1a1a]"
+                    >
+                      Devolver evidência
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        descartarCustodia(
+                          e.id,
+                          prompt("Justificativa")
+                        );
+                        setMenuAberto(null);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-[10px] text-red-400 hover:bg-[#1a1a1a]"
+                    >
+                      Descartar evidência
+                    </button>
+
+                  </div>
+                )}
+
+              </div>
+            );
+          })}
+        </div>
+        <div className="rounded-[16px] p-4">
+
+          <div className="flex items-center gap-2 mb-5">
+            <Shield size={16} />
+            <h2>Histórico</h2>
+          </div>
+
+          {historicoOrdenado.length === 0 && (
+            <p className="text-zinc-500 text-sm">
+              Nenhum histórico encontrado
+            </p>
+          )}
+
+          {historicoOrdenado.map((h, i) => (
+            <div key={i} className="mb-3">
+
+              <div className="p-4 rounded-[16px] bg-[#141414]">
+
+                <p className="font-medium text-[14px]">
+                  {formatarStatus(h.acao || h.tipoAcao)}
                 </p>
 
-              </div>
+                <div className="text-zinc-500 text-sm mt-1 space-y-1">
 
-              <div className="flex gap-2">
+                  {h.descricaoAcao && (
+                    <p>{h.descricaoAcao}</p>
+                  )}
 
-                <button
-                  onClick={() =>
-                    verificarIntegridade(evidencia.id)
-                  }
-                  className={`
-                    h-[42px]
-                    px-4
-                    rounded-[14px]
-                    border
-                    flex items-center gap-2
-                    ${temaClaro
-                      ? "border-zinc-300"
-                      : "border-zinc-700"}
-                  `}
-                >
-                  <SearchCheck size={15} />
-                  Verificar
-                </button>
+                  {h.justificativa && (
+                    <p>{h.justificativa}</p>
+                  )}
 
-                <button
-                  onClick={() =>
-                    baixarArquivo(evidencia.id)
-                  }
-                  className="
-                    h-[42px]
-                    px-4
-                    rounded-[14px]
-                    bg-blue-600
-                    text-white
-                    flex items-center gap-2
-                  "
-                >
-                  <Download size={15} />
-                  Download
-                </button>
+                  {h.custodianteAnterior && (
+                    <p>
+                      De: {h.custodianteAnterior}
+                    </p>
+                  )}
+
+                  {h.custodiantePosterior && (
+                    <p>
+                      Para: {h.custodiantePosterior}
+                    </p>
+                  )}
+
+                </div>
+
+                <span className="text-xs text-zinc-600 block mt-2">
+                  {formatarData(
+                    h.dataEvento || h.dataCriacao
+                  )}
+                </span>
 
               </div>
 
             </div>
-
-          ))}
-
-        </div>
-
-        {/* HISTÓRICO */}
-        <div className={`
-          rounded-[28px]
-          border
-          p-6
-          ${temaClaro
-            ? "border-zinc-200"
-            : "border-zinc-800"}
-        `}>
-
-          <div className="flex items-center gap-3 mb-7">
-
-            <Shield size={20} />
-
-            <h2 className="text-[24px] font-bold">
-              Histórico de Custódia
-            </h2>
-
-          </div>
-
-          {!historico.length && (
-            <p className="text-zinc-500">
-              Nenhum histórico encontrado.
-            </p>
-          )}
-
-          {historico.map((item, index) => (
-
-            <div
-              key={index}
-              className="
-                border-l-2 border-blue-600
-                pl-5 mb-8
-              "
-            >
-
-              <h4 className="font-semibold">
-                {item.acao || item.tipoAcao}
-              </h4>
-
-              <p className="text-zinc-500 text-[14px] mb-1">
-                {item.justificativa}
-              </p>
-
-              <span className="text-zinc-600 text-[12px]">
-                {formatarData(
-                  item.dataEvento ||
-                  item.dataCriacao
-                )}
-              </span>
-
-            </div>
-
           ))}
 
         </div>
