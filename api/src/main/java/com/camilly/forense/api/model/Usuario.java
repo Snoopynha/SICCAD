@@ -1,14 +1,25 @@
 package com.camilly.forense.api.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import org.hibernate.validator.constraints.br.CPF;
-import lombok.Data;
 import java.util.List;
 
+import org.hibernate.validator.constraints.br.CPF;
+
+import com.camilly.forense.api.model.enums.CargoUsuario;
 import com.camilly.forense.api.model.enums.TipoUsuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
 
 @Data
 @Entity
@@ -42,6 +53,11 @@ public class Usuario {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_global")
     private TipoUsuario tipoGlobal = TipoUsuario.PADRAO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cargo")
+    private CargoUsuario cargo;
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")

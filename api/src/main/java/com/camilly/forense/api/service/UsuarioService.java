@@ -23,44 +23,33 @@ import lombok.RequiredArgsConstructor;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioResponse criar(UsuarioRequest request) {
 
         if (usuarioRepository.findByCpf(request.cpf()).isPresent()) {
-
-            throw new RegraDeNegocioException(
-                "Já existe um usuário com esse CPF"
-            );
-
+            throw new RegraDeNegocioException("Já existe um usuário com esse CPF");
         }
 
         if (usuarioRepository.findByEmail(request.email()).isPresent()) {
-
-            throw new RegraDeNegocioException(
-                "Já existe um usuário com esse email"
-            );
-
+            throw new RegraDeNegocioException("Já existe um usuário com esse email");
         }
 
         Usuario usuario = new Usuario();
 
         usuario.setNome(request.nome());
-
         usuario.setCpf(request.cpf());
-
         usuario.setEmail(request.email());
 
         usuario.setSenhaHash(
             passwordEncoder.encode(request.senha())
         );
 
-        usuario.setTipoGlobal(
-            TipoUsuario.valueOf(
-                request.cargo().toUpperCase()
-            )
-        );
+        // REGRA CORRETA
+        usuario.setTipoGlobal(TipoUsuario.PADRAO);
+
+        // cargo vem direto como ENUM
+        usuario.setCargo(request.cargo());
 
         Usuario salvo = usuarioRepository.save(usuario);
 
@@ -68,9 +57,8 @@ public class UsuarioService {
             salvo.getId(),
             salvo.getNome(),
             salvo.getEmail(),
-            salvo.getTipoGlobal().name()
+            salvo.getCargo()
         );
-
     }
 
     public LoginResponse autenticar(LoginRequest request) {
@@ -78,22 +66,11 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository
             .findByEmail(request.email())
             .orElseThrow(() ->
-                new RegraDeNegocioException(
-                    "E-mail ou senha inválidos"
-                )
+                new RegraDeNegocioException("E-mail ou senha inválidos")
             );
 
-        if (
-            !passwordEncoder.matches(
-                request.senha(),
-                usuario.getSenhaHash()
-            )
-        ) {
-
-            throw new RegraDeNegocioException(
-                "E-mail ou senha inválidos"
-            );
-
+        if (!passwordEncoder.matches(request.senha(), usuario.getSenhaHash())) {
+            throw new RegraDeNegocioException("E-mail ou senha inválidos");
         }
 
         return new LoginResponse(
@@ -102,7 +79,6 @@ public class UsuarioService {
             usuario.getTipoGlobal().name(),
             "Login realizado com sucesso"
         );
-
     }
 
     public UsuarioResponse buscarPorId(Long id) {
@@ -110,18 +86,15 @@ public class UsuarioService {
         Usuario usuario = usuarioRepository
             .findById(id)
             .orElseThrow(() ->
-                new RecursoNaoEncontradoException(
-                    "Usuário não encontrado"
-                )
+                new RecursoNaoEncontradoException("Usuário não encontrado")
             );
 
         return new UsuarioResponse(
             usuario.getId(),
             usuario.getNome(),
             usuario.getEmail(),
-            usuario.getTipoGlobal().name()
+            usuario.getCargo()
         );
-
     }
 
     public Usuario buscarUsuarioCompletoPorId(Long id) {
@@ -129,11 +102,8 @@ public class UsuarioService {
         return usuarioRepository
             .findById(id)
             .orElseThrow(() ->
-                new RecursoNaoEncontradoException(
-                    "Usuário não encontrado"
-                )
+                new RecursoNaoEncontradoException("Usuário não encontrado")
             );
-
     }
 
     public List<UsuarioResponse> listar() {
@@ -145,10 +115,8 @@ public class UsuarioService {
                 u.getId(),
                 u.getNome(),
                 u.getEmail(),
-                u.getTipoGlobal().name()
+                u.getCargo()
             ))
             .collect(Collectors.toList());
-
     }
-
 }
