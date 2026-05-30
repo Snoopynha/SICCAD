@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 import LoginIcon from "../components/Login/LoginIcon";
 import EmailStep from "../components/Login/EmailStep";
 import PasswordStep from "../components/Login/PasswordStep";
 import FooterActions from "../components/Login/FooterActions";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -16,6 +13,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [idioma, setIdioma] = useState("pt");
   const [temaClaro, setTemaClaro] = useState(false);
+
+  const [recuperacaoAberta, setRecuperacaoAberta] = useState(false);
 
   function validarEmail(valor) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
@@ -57,9 +56,7 @@ export default function Login() {
         "http://localhost:8080/api/usuarios/autenticar",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, senha }),
         }
       );
@@ -72,33 +69,27 @@ export default function Login() {
         return;
       }
 
-      const usuario = data;
-
-      console.log("LOGIN OK:", usuario);
-
-      localStorage.setItem("usuario", JSON.stringify(usuario));
+      localStorage.setItem("usuario", JSON.stringify(data));
 
       setLoading(false);
 
       window.location.href =
-        usuario?.tipo_global === "ADMIN"
-          ? "/admin"
-          : "/dashboard";
+        data?.tipo_global === "ADMIN" ? "/admin" : "/dashboard";
 
-    } catch (error) {
+    } catch {
       setLoading(false);
       setErroSenha("Erro ao conectar com o servidor.");
-      console.error(error);
     }
   }
+
   return (
-    <div
-      className={`w-full min-h-screen flex flex-col items-center justify-between px-6 py-5
-      ${temaClaro ? "bg-[#f5f7fb] text-black" : "bg-[#050505] text-white"}`}
-    >
+    <div className={`w-full min-h-screen flex flex-col items-center justify-between px-6 py-5
+      ${temaClaro ? "bg-[#f5f7fb] text-black" : "bg-[#050505] text-white"}`}>
+
       <div />
 
-      <div className="w-full max-w-[420px] flex flex-col items-center gap-7">
+      <div className="w-full max-w-[420px] flex flex-col items-center gap-7 relative">
+
         <LoginIcon temaClaro={temaClaro} />
 
         <div className="text-center">
@@ -136,17 +127,62 @@ export default function Login() {
           />
         )}
 
-        <a className="text-sky-400 text-sm font-bold">
-          {idioma === "pt" ? "ESQUECI A SENHA" : "FORGOT PASSWORD"}
-        </a>
+        {/* BOTÃO + POPOVER */}
+        <div className="relative w-full flex justify-center">
+
+          <button
+            onClick={() => setRecuperacaoAberta((v) => !v)}
+            className="text-sky-400 text-sm font-bold hover:opacity-80 transition"
+          >
+            {idioma === "pt" ? "ESQUECI A SENHA" : "FORGOT PASSWORD"}
+          </button>
+
+          {recuperacaoAberta && (
+            <div
+              className={`
+                absolute bottom-full mb-3 w-[260px] p-4 rounded-xl border shadow-lg
+                animate-fade
+                ${temaClaro
+                  ? "bg-white border-zinc-200 text-black"
+                  : "bg-[#0a0a0a] border-zinc-800 text-white"}
+              `}
+            >
+
+              {/* SETINHA */}
+              <div
+                className={`
+                  absolute left-1/2 -translate-x-1/2 -bottom-2
+                  w-4 h-4 rotate-45 border
+                  ${temaClaro
+                    ? "bg-white border-zinc-200"
+                    : "bg-[#0a0a0a] border-zinc-800"}
+                `}
+              />
+
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                {idioma === "pt"
+                  ? "Para recuperar sua senha, entre em contato com o administrador do sistema."
+                  : "To recover your password, contact the system administrator."}
+              </p>
+
+              <button
+                onClick={() => setRecuperacaoAberta(false)}
+                className="mt-3 w-full h-9 rounded-md bg-sky-500 text-black text-sm font-semibold hover:opacity-90 transition"
+              >
+                OK
+              </button>
+
+            </div>
+          )}
+
+        </div>
+
       </div>
 
       <FooterActions
         idioma={idioma}
-        trocarIdioma={() =>
-          setIdioma((prev) => (prev === "pt" ? "en" : "pt"))
-        }
-        trocarTema={() => setTemaClaro((prev) => !prev)}
+        trocarIdioma={() => setIdioma((p) => (p === "pt" ? "en" : "pt"))}
+        trocarTema={() => setTemaClaro((p) => !p)}
         temaClaro={temaClaro}
       />
     </div>

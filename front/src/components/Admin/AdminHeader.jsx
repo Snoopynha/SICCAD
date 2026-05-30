@@ -6,6 +6,7 @@ export default function Header({
   temaClaro,
   setTemaClaro,
   usuario,
+  abrirModalUsuario,
 }) {
   const navigate = useNavigate();
   const [idioma, setIdioma] = useState("pt");
@@ -21,7 +22,7 @@ export default function Header({
   }
 
   const btnBase = `
-    w-[40px] h-[40px]
+    h-[40px]
     rounded-[10px]
     border
     flex items-center justify-center
@@ -33,48 +34,48 @@ export default function Header({
     : "bg-[#0b0b0b] border-zinc-700 text-zinc-300 hover:bg-zinc-900";
 
   return (
-    <header className="flex items-center justify-between flex-wrap gap-4 mb-6 w-full">
+    <header className="flex items-center justify-end gap-2 mb-6 w-full">
 
-      {/* ESQUERDA (LOGO + USER) */}
-      <div className="flex items-center gap-4">
+     <button
+  onClick={abrirModalUsuario}
+  className="
+    h-[40px]
+    px-4
+    rounded-[10px]
+    flex items-center justify-center
+    font-medium
+    text-white
+    bg-blue-600
+    hover:bg-blue-700
+    transition-all
+    shadow-lg shadow-blue-950/30
+  "
+>
+  + Novo Usuário
+</button>
 
-        {/* LOGO */}
-        <img
-         
-        />
+      <button
+        onClick={toggleIdioma}
+        className={`${btnBase} w-[40px] ${btnTheme} text-[12px] font-semibold`}
+      >
+        {idioma.toUpperCase()}
+      </button>
 
+      <button
+        onClick={() => setTemaClaro(!temaClaro)}
+        className={`${btnBase} w-[40px] ${btnTheme}`}
+      >
+        {temaClaro ? <Moon size={15} /> : <Sun size={15} />}
+      </button>
+
+      <button
+        onClick={logout}
+        className={`${btnBase} w-[40px] ${btnTheme} hover:text-red-400`}
+      >
+        <LogOut size={15} />
+      </button>
       
 
-      </div>
-
-      {/* DIREITA (BOTÕES) */}
-      <div className="flex items-center gap-2">
-
-        {/* idioma */}
-        <button
-          onClick={toggleIdioma}
-          className={`${btnBase} ${btnTheme} text-[12px] font-semibold`}
-        >
-          {idioma.toUpperCase()}
-        </button>
-
-        {/* tema */}
-        <button
-          onClick={() => setTemaClaro(!temaClaro)}
-          className={`${btnBase} ${btnTheme}`}
-        >
-          {temaClaro ? <Moon size={15} /> : <Sun size={15} />}
-        </button>
-
-        {/* logout */}
-        <button
-          onClick={logout}
-          className={`${btnBase} ${btnTheme} hover:text-red-400`}
-        >
-          <LogOut size={15} />
-        </button>
-
-      </div>
     </header>
   );
 }

@@ -9,23 +9,17 @@ export default function PasswordStep({
   loading,
   idioma,
   temaClaro
-}){
+}) {
+  const isPT = idioma === "pt";
 
-  return(
-
+  return (
     <div className="w-full flex flex-col gap-5 animate-fade">
 
       <button
         onClick={voltar}
         className="text-sm text-zinc-400 hover:text-sky-400 transition w-max"
       >
-
-        {
-          idioma === "pt"
-          ? "← Voltar"
-          : "← Back"
-        }
-
+        {isPT ? "← Voltar" : "← Back"}
       </button>
 
       <InputField
@@ -34,56 +28,28 @@ export default function PasswordStep({
         setValue={setSenha}
         onEnter={autenticar}
         temaClaro={temaClaro}
-        placeholder={
-          idioma === "pt"
-          ? "Senha"
-          : "Password"
-        }
+        placeholder={isPT ? "Senha" : "Password"}
       />
 
-      {
-        erroSenha && (
+      {erroSenha && (
+        <span className="text-red-400 text-sm">
+          {erroSenha}
+        </span>
+      )}
 
-          <span className="text-red-400 text-sm">
-
-            {erroSenha}
-
-          </span>
-
-        )
-      }
-
-      {
-        loading && (
-
-          <span className="text-sky-400 text-sm">
-
-            {
-              idioma === "pt"
-              ? "Autenticando..."
-              : "Authenticating..."
-            }
-
-          </span>
-
-        )
-      }
+      {loading && (
+        <span className="text-sky-400 text-sm">
+          {isPT ? "Autenticando..." : "Authenticating..."}
+        </span>
+      )}
 
       <button
         onClick={autenticar}
         className="w-full h-12 rounded-full bg-sky-500 text-black font-bold hover:opacity-90 transition"
       >
-
-        {
-          idioma === "pt"
-          ? "ENTRAR"
-          : "LOGIN"
-        }
-
+        {isPT ? "ENTRAR" : "LOGIN"}
       </button>
 
     </div>
-
   );
-
 }

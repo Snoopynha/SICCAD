@@ -3,15 +3,17 @@ package com.camilly.forense.api.service;
 import java.util.Arrays;
 
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 
+import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.model.Caso;
 import com.camilly.forense.api.model.Usuario;
 import com.camilly.forense.api.model.UsuarioCaso;
+import com.camilly.forense.api.model.enums.CargoUsuario;
 import com.camilly.forense.api.model.enums.PapelCaso;
 import com.camilly.forense.api.model.enums.TipoUsuario;
 import com.camilly.forense.api.repository.UsuarioRepository;
-import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +35,8 @@ public class AutorizacaoService {
         Usuario usuario = buscarUsuario(idUsuarioLogado);
         if (usuario.getTipoGlobal() == TipoUsuario.ADMIN) return;
 
-        // Busca o vínculo específico do usuário com este caso
         UsuarioCaso vinculo = caso.getUsuarios().stream().filter(uc -> uc.getUsuario().getId().equals(idUsuarioLogado) && uc.getAtivo()).findFirst().orElseThrow(() -> new RegraDeNegocioException("Acesso negado: você não tem vínculo ativo com este caso"));
 
-        // Verifica se o papel do usuário está na lista de papéis que podem fazer a ação
         boolean temPermissao = Arrays.asList(papeisPermitidos).contains(vinculo.getPapelNoCaso());
 
         if (!temPermissao) {
@@ -44,8 +44,16 @@ public class AutorizacaoService {
         }
     }
 
+    public void validarCargo(Long idUsuarioLogado, CargoUsuario... cargosPermitidos) {
+        Usuario usuario = buscarUsuario(idUsuarioLogado);
+        if (usuario.getTipoGlobal() == TipoUsuario.ADMIN) return;
+
+        if (usuario.getCargo() == null || !Arrays.asList(cargosPermitidos).contains(usuario.getCargo())) {
+            throw new RegraDeNegocioException("Acesso negado: seu cargo não permite realizar esta operação");
+        }
+    }
+
     private Usuario buscarUsuario(Long id) {
         return usuarioRepository.findById(id).orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado"));
     }
-    
 }

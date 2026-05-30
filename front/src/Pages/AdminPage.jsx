@@ -2,18 +2,30 @@ import { useState, useEffect, useMemo } from "react";
 import AdminHeader from "../components/Admin/AdminHeader";
 import FiltersBar from "../components/Admin/FiltersBar";
 import UsersList from "../components/Admin/UsersList";
+import CasesList from "../components/Admin/CasesList";
 import CreateUserModal from "../components/Admin/CreateUserModal";
 import DetailsModal from "../components/Admin/DetailsModal";
+import CaseDetailsModal from "../components/Admin/CaseDetailsModal";
 
 export default function AdminPage() {
+  const usuarioStorage = JSON.parse(localStorage.getItem("usuario"));
+
   const [temaClaro, setTemaClaro] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
   const [idioma, setIdioma] = useState("PT");
+
   const [usuarios, setUsuarios] = useState([]);
   const [casos, setCasos] = useState([]);
+
   const [busca, setBusca] = useState("");
+
+  const [view, setView] = useState("usuarios");
+
   const [filtroCargo, setFiltroCargo] = useState("TODOS");
+  const [filtroStatus, setFiltroStatus] = useState("TODOS");
+
   const [detalhe, setDetalhe] = useState(null);
+  const [casoSelecionado, setCasoSelecionado] = useState(null);
 
   async function carregarUsuarios() {
     try {
@@ -27,8 +39,14 @@ export default function AdminPage() {
 
   async function carregarCasos() {
     try {
-      const res = await fetch("http://localhost:8080/api/casos");
+      const res = await fetch("http://localhost:8080/api/casos", {
+        headers: {
+          "X-User-Id": usuarioStorage?.id,
+        },
+      });
+
       const data = await res.json();
+
       setCasos(Array.isArray(data) ? data : []);
     } catch {
       setCasos([]);
@@ -40,47 +58,41 @@ export default function AdminPage() {
     carregarCasos();
   }, []);
 
-  function exportarUsuarios() {
-    const blob = new Blob([JSON.stringify(usuarios || [], null, 2)], {
-      type: "application/json",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "usuarios.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   const usuariosComCasos = useMemo(() => {
     const mapa = {};
 
     casos.forEach((caso) => {
-      caso.participantes?.forEach((p) => {
-        const id = p.idUsuario;
+      (caso.usuarios || []).forEach((uc) => {
+        const id = uc.id?.idUsuario;
+
+        if (!id) return;
 
         if (!mapa[id]) mapa[id] = [];
 
         mapa[id].push({
           id: caso.id,
           status: caso.status,
-          titulo: caso.titulo || `Caso #${caso.id}`,
+          titulo: caso.titulo || "Sem título",
+          papel: uc.papelNoCaso,
         });
       });
     });
 
-    return usuarios.map((u) => ({
-      ...u,
-      casos: mapa[u.id] || [],
-    }));
+    return usuarios
+      .filter((u) => u.tipoGlobal !== "ADMIN")
+      .map((u) => ({
+        ...u,
+        casos: mapa[u.id] || [],
+      }));
   }, [usuarios, casos]);
 
   const usuariosFiltrados = usuariosComCasos.filter((u) => {
-    const termo = busca?.toLowerCase() || "";
+    const termo = busca.toLowerCase();
 
     const matchCargo =
-      filtroCargo === "TODOS" || u.cargo === filtroCargo;
+      filtroCargo === "TODOS" ||
+      u.cargo === filtroCargo;
 
     const matchBusca =
       !termo ||
@@ -90,10 +102,28 @@ export default function AdminPage() {
     return matchCargo && matchBusca;
   });
 
+  const casosFiltrados = casos.filter((c) => {
+    const termo = busca.toLowerCase();
+
+    const matchBusca =
+      !termo ||
+      c.titulo?.toLowerCase().includes(termo) ||
+      c.descricao?.toLowerCase().includes(termo);
+
+    const matchStatus =
+      filtroStatus === "TODOS" ||
+      c.status === filtroStatus;
+
+    return matchBusca && matchStatus;
+  });
+
   return (
     <div
-      className={`min-h-screen w-full transition ${temaClaro ? "bg-[#f4f6fb] text-black" : "bg-[#050505] text-white"
-        }`}
+      className={`min-h-screen w-full transition ${
+        temaClaro
+          ? "bg-[#f4f6fb] text-black"
+          : "bg-[#050505] text-white"
+      }`}
     >
       <div className="max-w-[1250px] mx-auto px-6 py-6">
 
@@ -102,51 +132,135 @@ export default function AdminPage() {
           setTemaClaro={setTemaClaro}
           idioma={idioma}
           setIdioma={setIdioma}
+          abrirModalUsuario={() => setModalAberto(true)}
+        
         />
+        
 
-        <div className="mb-6 flex justify-between items-center mt-5">
+       <div
+  className="
+    flex
+    justify-between
+    items-center
+    px-2
+    py-2
+    w-full
+    rounded-t-3xl
+    border border-zinc-800
+    border-b-0
+    bg-[#0b0b0b]
+    -mb-[1px]
+  "
+>
 
+  <button
+    onClick={() => setView("usuarios")}
+    className={`
+      flex-1
+      h-12
+      rounded-2xl
+      font-medium
+      transition-all
+      ${
+        view === "usuarios"
+          ? "bg-blue-600 text-white shadow-lg shadow-blue-950/40"
+          : "text-zinc-500 hover:text-white hover:bg-zinc-900"
+      }
+    `}
+  >
+    Usuários
+  </button>
 
-          <div className="flex gap-3 ms-auto mt-10">
-            <button
-              onClick={exportarUsuarios}
-              className="h-11 px-6 rounded-2xl border"
+  <div className="w-2" />
 
-            >
-              Exportar
-            </button>
+  <button
+    onClick={() => setView("casos")}
+    className={`
+      flex-1
+      h-12
+      rounded-2xl
+      font-medium
+      transition-all
+      ${
+        view === "casos"
+          ? "bg-blue-600 text-white shadow-lg shadow-blue-950/40"
+          : "text-zinc-500 hover:text-white hover:bg-zinc-900"
+      }
+    `}
+  >
+    Casos
+  </button>
 
-            <button
-              onClick={() => setModalAberto(true)}
-              className="h-11 px-6 rounded-2xl border"
-            >
-              Novo usuário
-            </button>
-          </div>
-        </div>
+</div>
 
-        <div className="rounded-3xl border p-5 bg-[#0b0b0b] border-zinc-800">
+        <div
+  className="
+    rounded-b-3xl
+    border border-zinc-800
+    bg-[#0b0b0b]
+    overflow-hidden
+    shadow-[0_20px_60px_rgba(0,0,0,0.35)]
+  "
+>
 
-          <FiltersBar
-            idioma={idioma}
-            view="usuarios"
-            setFiltroCargo={setFiltroCargo}
-            filtroCargo={filtroCargo}
-            busca={busca}
-            setBusca={setBusca}
-            temaClaro={temaClaro}
-          />
+  <div
+    className="
+      px-6 py-5
+      border-b border-zinc-800
+    
+    "
+  >
+    <FiltersBar
+      idioma={idioma}
+      view={view}
+      busca={busca}
+      setBusca={setBusca}
+      filtroCargo={filtroCargo}
+      setFiltroCargo={setFiltroCargo}
+      filtroStatus={filtroStatus}
+      setFiltroStatus={setFiltroStatus}
+    />
+  </div>
 
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <UsersList
-              usuarios={usuariosFiltrados}
-              temaClaro={temaClaro}
-              idioma={idioma}
-              onClick={(u) => setDetalhe(u)}
-            />
-          </div>
+  <div className="p-6">
 
-        </div>
+    <div className="flex items-center justify-between mb-5">
+      <div>
+        <h2 className="text-lg font-semibold text-white">
+          {view === "usuarios"
+            ? "Gerenciamento  Usuários"
+            : "Gerenciamento de Casos"}
+        </h2>
+
+        <p className="text-sm text-zinc-500 mt-1">
+          {view === "usuarios"
+            ? `${usuariosFiltrados.length} usuários encontrados`
+            : `${casosFiltrados.length} casos encontrados`}
+        </p>
+      </div>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+      {view === "usuarios" ? (
+        <UsersList
+          usuarios={usuariosFiltrados}
+          temaClaro={temaClaro}
+          idioma={idioma}
+          onClick={(u) => setDetalhe(u)}
+        />
+      ) : (
+        <CasesList
+          casos={casosFiltrados}
+          onClick={(caso) => setCasoSelecionado(caso)}
+        />
+      )}
+
+    </div>
+
+  </div>
+
+</div>
       </div>
 
       {modalAberto && (
@@ -169,6 +283,13 @@ export default function AdminPage() {
           />
         </div>
       )}
+
+      {casoSelecionado && (
+  <CaseDetailsModal
+    caso={casoSelecionado}
+    fechar={() => setCasoSelecionado(null)}
+  />
+)}
     </div>
   );
 }

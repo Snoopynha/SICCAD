@@ -1,22 +1,26 @@
 package com.camilly.forense.api.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.camilly.forense.api.blockchain.BlockchainSimuladaService;
 import com.camilly.forense.api.blockchain.Bloco;
 import com.camilly.forense.api.controller.exception.RecursoNaoEncontradoException;
 import com.camilly.forense.api.controller.exception.RegraDeNegocioException;
 import com.camilly.forense.api.dto.HistoricoCustodiaResponse;
-import com.camilly.forense.api.model.*;
+import com.camilly.forense.api.model.Evidencia;
+import com.camilly.forense.api.model.HistoricoCustodia;
+import com.camilly.forense.api.model.Usuario;
 import com.camilly.forense.api.model.enums.AcaoCustodia;
-import com.camilly.forense.api.model.enums.PapelCaso;
+import com.camilly.forense.api.model.enums.CargoUsuario;
 import com.camilly.forense.api.model.enums.StatusEvidencia;
-import com.camilly.forense.api.repository.HistoricoCustodiaRepository;
 import com.camilly.forense.api.repository.EvidenciaRepository;
+import com.camilly.forense.api.repository.HistoricoCustodiaRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +93,7 @@ public class HistoricoCustodiaService {
     public HistoricoCustodia registrarAnalise(Long idEvidencia, Long idUsuarioLogado, String justificativa) {
         Evidencia evidencia = buscarEvidencia(idEvidencia, idUsuarioLogado);
         validarCustodianteAtual(evidencia, idUsuarioLogado);
-        autorizacaoService.validarPapelNoCaso(evidencia.getCaso(), idUsuarioLogado, PapelCaso.PERITO, PapelCaso.AUDITOR);
+        autorizacaoService.validarCargo(idUsuarioLogado, CargoUsuario.PERITO, CargoUsuario.AUDITOR);
 
         evidencia.setStatus(StatusEvidencia.EM_ANALISE);
         evidenciaRepository.save(evidencia);
@@ -124,7 +128,7 @@ public class HistoricoCustodiaService {
     public HistoricoCustodia registrarDescarte(Long idEvidencia, Long idUsuarioLogado, String justificativa) {
         Evidencia evidencia = buscarEvidencia(idEvidencia, idUsuarioLogado);
         validarCustodianteAtual(evidencia, idUsuarioLogado);
-        autorizacaoService.validarPapelNoCaso(evidencia.getCaso(), idUsuarioLogado, PapelCaso.DELEGADO);
+        autorizacaoService.validarCargo(idUsuarioLogado, CargoUsuario.DELEGADO);
 
         Usuario atual = evidencia.getCustodianteAtual();
 

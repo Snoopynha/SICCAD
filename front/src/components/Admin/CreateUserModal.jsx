@@ -1,5 +1,3 @@
-// src/components/Admin/CreateUserModal.jsx
-
 import { useState } from "react";
 
 export default function CreateUserModal({ temaClaro, fecharModal }) {
@@ -53,18 +51,30 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
 
   const statusSenha = validarSenha(senha);
 
+  function limparCPF(valor) {
+    return valor.replace(/\D/g, "");
+  }
+
   async function criarUsuario() {
     if (!nome || !email || !cpf || !senha || !cargo) {
-      alert("Por favor, preencha todos os campos.");
+      alert("Preencha todos os campos.");
       return;
     }
 
-    const payload = { nome, email, cpf, senha, cargo };
+    const payload = {
+      nome,
+      email,
+      cpf: limparCPF(cpf),
+      senha,
+      cargo
+    };
 
     try {
       const res = await fetch("http://localhost:8080/api/usuarios", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(payload)
       });
 
@@ -75,6 +85,13 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
       }
 
       await res.json();
+
+      setNome("");
+      setEmail("");
+      setCpf("");
+      setSenha("");
+      setCargo("");
+
       fecharModal();
     } catch (err) {
       alert("Erro ao conectar no backend.");
@@ -141,12 +158,14 @@ export default function CreateUserModal({ temaClaro, fecharModal }) {
             className={`h-12 px-4 rounded-xl outline-none ${temaClaro ? "bg-zinc-100 text-black" : "bg-[#101010] text-white"}`}
           >
             <option value="">Selecione o cargo</option>
-            <option value="PADRAO">Padrão</option>
+            <option value="PERITO">Perito</option>
+            <option value="DELEGADO">Delegado</option>
+            <option value="AUDITOR">Auditor</option>
           </select>
 
           <button
             onClick={criarUsuario}
-            className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold "
+            className="h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold"
           >
             Criar usuário
           </button>

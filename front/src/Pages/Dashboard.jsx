@@ -36,30 +36,22 @@ export default function Dashboard() {
   };
 
   async function apiFetch(url, options = {}) {
-
     const res = await fetch(url, {
-
       ...options,
-
       headers: {
         ...headers,
         ...(options.headers || {}),
       },
-
     });
-
     if (!res.ok) {
       throw new Error("Erro na requisição");
     }
-
     return res;
   }
-
 
   useEffect(() => {
     async function carregarUsuario() {
       if (!usuarioStorage?.id) return;
-
       try {
         const res = await fetch(
           `http://localhost:8080/api/usuarios/${usuarioStorage.id}`
@@ -69,7 +61,6 @@ export default function Dashboard() {
         console.log(err);
       }
     }
-
     carregarUsuario();
   }, []);
 
@@ -77,7 +68,6 @@ export default function Dashboard() {
     try {
       const res = await apiFetch("http://localhost:8080/api/casos");
       const data = await res.json();
-
       setCasos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
@@ -87,12 +77,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (usuarioStorage?.id) carregarCasos();
   }, []);
+
   async function carregarHistoricoCustodia(idEvidencia) {
     try {
       const res = await apiFetch(
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/historico`
       );
-
       const data = await res.json();
       return Array.isArray(data) ? data : [];
     } catch (err) {
@@ -100,109 +90,59 @@ export default function Dashboard() {
       return [];
     }
   }
+
   async function abrirDetalhes(idCaso) {
     try {
-      const [casoData, participantesData, evidenciasData] =
-        await Promise.all([
-          apiFetch(`http://localhost:8080/api/casos/${idCaso}`).then((r) =>
-            r.json()
-          ),
-
-          apiFetch(
-            `http://localhost:8080/api/casos/${idCaso}/participantes`
-          ).then((r) => r.json()),
-
-          apiFetch(
-            `http://localhost:8080/api/casos/${idCaso}/evidencias`
-          ).then((r) => r.json()),
-        ]);
+      const [casoData, participantesData, evidenciasData] = await Promise.all([
+        apiFetch(`http://localhost:8080/api/casos/${idCaso}`).then((r) => r.json()),
+        apiFetch(`http://localhost:8080/api/casos/${idCaso}/participantes`).then((r) => r.json()),
+        apiFetch(`http://localhost:8080/api/casos/${idCaso}/evidencias`).then((r) => r.json()),
+      ]);
 
       let historicoCompleto = [];
       historicoCompleto.push({
         tipoAcao: "CASO CRIADO",
-        justificativa: `Caso criado em ${new Date(
-          casoData.dataAbertura
-        ).toLocaleString("pt-BR")}`,
+        justificativa: `Caso criado em ${new Date(casoData.dataAbertura).toLocaleString("pt-BR")}`,
         dataEvento: casoData.dataAbertura,
       });
 
       if (Array.isArray(evidenciasData)) {
-
         for (const e of evidenciasData) {
-
           historicoCompleto.push({
             tipoAcao: "UPLOAD DE EVIDÊNCIA",
-            justificativa: `${e.nomeOriginalArquivo || e.nomeArquivo
-              } enviado para o caso`,
+            justificativa: `${e.nomeOriginalArquivo || e.nomeArquivo} enviado para o caso`,
             dataEvento: e.dataUpload,
           });
 
-          const historicoCustodia =
-            await carregarHistoricoCustodia(e.id);
-
+          const historicoCustodia = await carregarHistoricoCustodia(e.id);
           if (Array.isArray(historicoCustodia)) {
-
             historicoCustodia.forEach((h) => {
-
               const tipo = h.acao || "";
-
-              if (tipo === "COLETA") {
-                return;
-              }
-
+              if (tipo === "COLETA") return;
               historicoCompleto.push({
-
                 tipoAcao: tipo,
-
                 descricaoAcao: h.descricaoAcao,
-
                 justificativa: h.justificativa,
-
                 dataEvento: h.dataHora,
-
                 custodianteAnterior: h.custodianteAnterior,
-
                 custodiantePosterior: h.custodiantePosterior,
-
-                evidencia:
-                  e.nomeOriginalArquivo ||
-                  e.nomeArquivo,
-
+                evidencia: e.nomeOriginalArquivo || e.nomeArquivo,
               });
-
             });
-
           }
-
         }
-
       }
 
       historicoCompleto.sort(
-        (a, b) =>
-          new Date(b.dataEvento || 0) -
-          new Date(a.dataEvento || 0)
+        (a, b) => new Date(b.dataEvento || 0) - new Date(a.dataEvento || 0)
       );
 
       setCasoSelecionado(idCaso);
       setCasoDetalhado(casoData);
-
-      setParticipantes(
-        Array.isArray(participantesData)
-          ? participantesData
-          : []
-      );
-
-      setEvidencias(
-        Array.isArray(evidenciasData)
-          ? evidenciasData
-          : []
-      );
-
+      setParticipantes(Array.isArray(participantesData) ? participantesData : []);
+      setEvidencias(Array.isArray(evidenciasData) ? evidenciasData : []);
       setHistorico(historicoCompleto);
-
       setDetalhesAberto(true);
-
     } catch (err) {
       console.log(err);
     }
@@ -216,9 +156,9 @@ export default function Dashboard() {
     setEvidencias([]);
     setHistorico([]);
   }
+
   function filtrarCasos(lista) {
     let result = [...lista];
-
     if (busca) {
       const b = busca.toLowerCase();
       result = result.filter(
@@ -228,19 +168,15 @@ export default function Dashboard() {
           c.usuarios?.some((u) => u.nome?.toLowerCase().includes(b))
       );
     }
-
     if (statusFiltro) {
       result = result.filter((c) => c.status === statusFiltro);
     }
-
     if (ordenacao === "recentes") {
       result.sort((a, b) => new Date(b.dataAbertura) - new Date(a.dataAbertura));
     }
-
     if (ordenacao === "antigos") {
       result.sort((a, b) => new Date(a.dataAbertura) - new Date(b.dataAbertura));
     }
-
     return result;
   }
 
@@ -252,7 +188,6 @@ export default function Dashboard() {
         `http://localhost:8080/api/casos/${casoSelecionado}/${endpoint}`,
         { method: "PATCH" }
       );
-
       await carregarCasos();
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
@@ -270,19 +205,14 @@ export default function Dashboard() {
       const res = await apiFetch(
         `http://localhost:8080/api/casos/${casoSelecionado}/evidencias/${idEvidencia}/verificar-integridade`
       );
-
       const data = await res.json();
       setEvidencias((prev) =>
         prev.map((e) =>
           e.id === idEvidencia
-            ? {
-              ...e,
-              resultadoIntegridade: data.integro ? "OK" : "ALTERADO",
-            }
+            ? { ...e, resultadoIntegridade: data.integro ? "OK" : "ALTERADO" }
             : e
         )
       );
-
     } catch (err) {
       console.log(err);
     }
@@ -291,25 +221,17 @@ export default function Dashboard() {
   async function adicionarParticipante() {
     try {
       if (!buscaUsuario) return alert("Digite o email do usuário");
-
-      const usuarios = await fetch(
-        "http://localhost:8080/api/usuarios"
-      ).then((r) => r.json());
-
+      const usuarios = await fetch("http://localhost:8080/api/usuarios").then((r) => r.json());
       const user = usuarios.find(
         (u) => u.email?.toLowerCase() === buscaUsuario.toLowerCase()
       );
-
       if (!user) return alert("Usuário não encontrado");
-
       await apiFetch(
         `http://localhost:8080/api/casos/${casoSelecionado}/participantes?idUsuario=${user.id}&papel=${papelSelecionado}`,
         { method: "POST" }
       );
-
       setBuscaUsuario("");
       setParticipanteModal(false);
-
       await abrirDetalhes(casoSelecionado);
       await carregarCasos();
     } catch (err) {
@@ -320,18 +242,14 @@ export default function Dashboard() {
   async function removerParticipante(idUsuario) {
     try {
       if (!confirm("Deseja remover este participante?")) return;
-
       await apiFetch(
         `http://localhost:8080/api/casos/${casoSelecionado}/participantes/${idUsuario}`,
         { method: "DELETE" }
       );
-
       const novaLista = participantes.filter(
         (p) => Number(p.idUsuario) !== Number(idUsuario)
       );
-
       setParticipantes(novaLista);
-
       setCasos((prev) =>
         prev.map((c) =>
           Number(c.id) === Number(casoSelecionado)
@@ -343,39 +261,28 @@ export default function Dashboard() {
       console.log(err);
     }
   }
+
   function formatarStatus(status) {
     switch (status) {
-      case "ANDAMENTO":
-        return "Em andamento";
-
-      case "PERICIA":
-        return "Perícia";
-
-      case "CONCLUIDO":
-        return "Concluído";
-
-      case "ARQUIVADO":
-        return "Arquivado";
-
-      default:
-        return status;
+      case "ANDAMENTO": return "Em andamento";
+      case "PERICIA": return "Perícia";
+      case "CONCLUIDO": return "Concluído";
+      case "ARQUIVADO": return "Arquivado";
+      default: return status;
     }
   }
 
   async function transferirCustodia(idEvidencia, idDestino, justificativa) {
     try {
+      if (!idDestino || !justificativa) return;
       await apiFetch(
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/transferir?idDestino=${idDestino}`,
         {
           method: "POST",
           body: JSON.stringify({ justificativa }),
-          headers: {
-            ...headers,
-            "Content-Type": "application/json",
-          },
+          headers: { ...headers, "Content-Type": "application/json" },
         }
       );
-
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
       console.log(err);
@@ -388,7 +295,6 @@ export default function Dashboard() {
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/aceitar`,
         { method: "PATCH" }
       );
-
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
       console.log(err);
@@ -397,18 +303,15 @@ export default function Dashboard() {
 
   async function analisarCustodia(idEvidencia, justificativa) {
     try {
+      if (!justificativa) return;
       await apiFetch(
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/analisar`,
         {
           method: "POST",
           body: JSON.stringify({ justificativa }),
-          headers: {
-            ...headers,
-            "Content-Type": "application/json",
-          },
+          headers: { ...headers, "Content-Type": "application/json" },
         }
       );
-
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
       console.log(err);
@@ -417,18 +320,15 @@ export default function Dashboard() {
 
   async function devolverCustodia(idEvidencia, justificativa) {
     try {
+      if (!justificativa) return;
       await apiFetch(
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/devolver`,
         {
           method: "POST",
           body: JSON.stringify({ justificativa }),
-          headers: {
-            ...headers,
-            "Content-Type": "application/json",
-          },
+          headers: { ...headers, "Content-Type": "application/json" },
         }
       );
-
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
       console.log(err);
@@ -437,38 +337,30 @@ export default function Dashboard() {
 
   async function descartarCustodia(idEvidencia, justificativa) {
     try {
+      if (!justificativa) return;
       await apiFetch(
         `http://localhost:8080/api/evidencias/${idEvidencia}/custodia/descartar`,
         {
           method: "POST",
           body: JSON.stringify({ justificativa }),
-          headers: {
-            ...headers,
-            "Content-Type": "application/json",
-          },
+          headers: { ...headers, "Content-Type": "application/json" },
         }
       );
-
       await abrirDetalhes(casoSelecionado);
     } catch (err) {
       console.log(err);
     }
   }
+
   async function enviarEvidencia() {
     try {
       if (!arquivo) return alert("Selecione um arquivo");
-
       const formData = new FormData();
       formData.append("arquivo", arquivo);
-
       await apiFetch(
         `http://localhost:8080/api/casos/${casoSelecionado}/evidencias`,
-        {
-          method: "POST",
-          body: formData,
-        }
+        { method: "POST", body: formData }
       );
-
       await abrirDetalhes(casoSelecionado);
       setArquivo(null);
       setEvidenciaModal(false);
@@ -482,9 +374,7 @@ export default function Dashboard() {
       const blob = await apiFetch(
         `http://localhost:8080/api/casos/${casoSelecionado}/evidencias/${idEvidencia}/baixar`
       ).then((r) => r.blob());
-
       const url = window.URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = "evidencia";
@@ -499,34 +389,26 @@ export default function Dashboard() {
       const res = await apiFetch(
         `http://localhost:8080/api/notificacoes/caso/${idCaso}`
       );
-
       const data = await res.json();
       setNotificacoes(data.notificacoes || []);
     } catch (err) {
       console.log(err);
     }
-
   }
 
   useEffect(() => {
     if (!casoSelecionado) return;
-
     carregarNotificacoes(casoSelecionado);
-
     const interval = setInterval(() => {
       carregarNotificacoes(casoSelecionado);
     }, 5000);
-
     return () => clearInterval(interval);
   }, [casoSelecionado]);
 
-  let i = 1;
   return (
     <div
-      className={`min-h-screen transition-all ${temaClaro ? "bg-[#f5f7fb] text-black" : "bg-[#050505] text-white"
-        }`}
+      className={`min-h-screen transition-all ${temaClaro ? "bg-[#f5f7fb] text-black" : "bg-[#050505] text-white"}`}
     >
-
       <div className="max-w-[1280px] mx-auto px-10 py-8">
         <Header
           temaClaro={temaClaro}
@@ -565,7 +447,9 @@ export default function Dashboard() {
         participantes={participantes}
         evidencias={evidencias}
         historico={historico}
-        usuarioLogadoId={usuarioStorage.id}
+        usuarioLogadoId={usuarioStorage?.id}
+        usuarioLogadoTipo={usuario?.tipoGlobal}
+        usuarioLogadoCargo={usuario?.cargo}
         abrirParticipante={() => setParticipanteModal(true)}
         abrirEvidencia={() => setEvidenciaModal(true)}
         baixarArquivo={baixarArquivo}
@@ -611,6 +495,7 @@ export default function Dashboard() {
           }}
           carregarCasos={carregarCasos}
           usuarioStorage={usuarioStorage}
+          
         />
       )}
     </div>
